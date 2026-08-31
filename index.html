@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>지중표시기 현장사진 정리</title>
+<title>현장사진 정리</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}   /* display 규칙이 hidden 속성을 덮어쓰지 못하게 */
 body{font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif;background:#F4F6F9;color:#22303C;padding-bottom:90px}
 .bar{background:#1F4E79;color:#fff;padding:12px 18px;position:sticky;top:0;z-index:5;
   display:flex;align-items:center;gap:12px;
@@ -22,13 +23,15 @@ body{font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif;backgr
 .card h2{font-size:14px;color:#1F4E79;margin-bottom:11px;display:flex;align-items:center;gap:8px}
 .card h2 .n{background:#1F4E79;color:#fff;font-size:11.5px;border-radius:11px;padding:2px 9px}
 label{display:block;font-size:12.5px;color:#48596A;font-weight:700;margin:10px 0 5px}
-input[type=text],input[type=number]{width:100%;padding:12px;border:1px solid #CBD8E4;border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
-input:focus{outline:2px solid #1F4E79;outline-offset:-1px}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;padding:12px;border:1px solid #CBD8E4;border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
+textarea{min-height:74px;resize:vertical;line-height:1.5}
+input:focus,textarea:focus,select:focus{outline:2px solid #1F4E79;outline-offset:-1px}
 .hint{font-size:11.5px;color:#8798A6;margin-top:6px;line-height:1.55}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#1F4E79;color:#fff;
   font-size:14px;border:0;border-radius:9px;padding:13px 18px;cursor:pointer;font-family:inherit;font-weight:700}
 .btn.w{background:#fff;color:#1F4E79;border:1px solid #B4C6DC}
 .btn.g{background:#5A7186}.btn.r{background:#B23A3A}
+.btn.sm{padding:8px 12px;font-size:12.5px}
 .btn:disabled{opacity:.45}
 .btn.full{width:100%}
 .row{display:flex;gap:9px;flex-wrap:wrap}
@@ -36,6 +39,8 @@ input:focus{outline:2px solid #1F4E79;outline-offset:-1px}
 .seg button{flex:1;background:#fff;border:0;padding:12px 8px;font-size:13.5px;font-family:inherit;color:#5A6E82;cursor:pointer}
 .seg button.on{background:#1F4E79;color:#fff;font-weight:700}
 .seg.sm button{padding:9px 6px;font-size:12.5px}
+.seg.tiny button{padding:7px 4px;font-size:12px}
+.seg.bad button.on{background:#B23A3A}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;margin-top:12px}
 .ph{position:relative;border:1px solid #D5DFE9;border-radius:9px;overflow:hidden;background:#EEF2F6}
 .ph img{width:100%;aspect-ratio:181/158;height:auto;object-fit:cover;display:block}
@@ -57,82 +62,300 @@ input:focus{outline:2px solid #1F4E79;outline-offset:-1px}
 .tag{display:inline-block;background:#EAF1F8;color:#1F4E79;font-size:12px;font-weight:700;border-radius:5px;padding:4px 10px}
 input[type=file]{display:none}
 
+/* ---- 홈(업무 고르기) ---- */
+.jobs{display:grid;gap:12px}
+.job{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #DDE5ED;border-radius:11px;
+  padding:18px 16px;cursor:pointer;text-align:left;font-family:inherit;width:100%}
+.job:active{background:#F0F5FA}
+.job .ico{flex:none;width:44px;height:44px;border-radius:11px;background:#EAF1F8;color:#1F4E79;
+  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+.job .tx{flex:1;min-width:0}
+.job .tx b{display:block;font-size:15px;color:#22303C;margin-bottom:3px}
+.job .tx span{font-size:12px;color:#8798A6;line-height:1.5}
+.job .go{flex:none;color:#B4C6DC;font-size:20px}
+
+/* ---- 목록(월 / 국사) ---- */
+.list{display:grid;gap:9px;margin-top:12px}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #DDE5ED;border-radius:10px;padding:13px 14px}
+.item .tx{flex:1;min-width:0;cursor:pointer}
+.item .tx b{display:block;font-size:14px}
+.item .tx span{font-size:11.5px;color:#8798A6}
+.item .rm{flex:none;border:0;background:transparent;color:#B23A3A;font-size:12.5px;cursor:pointer;font-family:inherit;padding:6px 8px}
+
+/* ---- 사진 칸(고정 슬롯) ---- */
+.slot{border:1px solid #D5DFE9;border-radius:10px;overflow:hidden;background:#fff;margin-top:10px}
+.slot .hd{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#F7FAFC;border-bottom:1px solid #E5EBF1}
+.slot .hd b{font-size:12.5px;color:#1F4E79;flex:1;min-width:0}
+.slot .bd{padding:11px}
+.slot .pv{width:100%;max-height:190px;object-fit:contain;background:#EEF2F6;border-radius:7px;display:block}
+.slot .none{padding:20px;text-align:center;color:#A3B1BE;font-size:12.5px;background:#F7FAFC;border-radius:7px}
+.slot .lb{width:100%;padding:8px 10px;border:1px solid #DDE5ED;border-radius:7px;font-size:13px;font-family:inherit;margin-bottom:9px}
+.sec{margin-top:18px}
+.sec>h3{font-size:13px;color:#1F4E79;font-weight:800;padding-bottom:7px;border-bottom:2px solid #E5EBF1}
+.cnt{font-size:11.5px;color:#8798A6;font-weight:400}
+
+/* ---- 여러 개 고르기(칩) ---- */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chips button{border:1px solid #CBD8E4;background:#fff;color:#5A6E82;font-family:inherit;font-size:13px;
+  padding:10px 14px;border-radius:20px;cursor:pointer}
+.chips button.on{background:#1F4E79;border-color:#1F4E79;color:#fff;font-weight:700}
+.ro{padding:12px;border:1px solid #E5EBF1;border-radius:8px;background:#F7FAFC;color:#48596A;font-size:14px;min-height:44px}
+.ro:empty::before{content:'수리항목을 고르면 여기에 자동으로 들어갑니다';color:#A3B1BE;font-size:12.5px}
+
+/* ---- 사진 위 빨간 동그라미 ---- */
+/* 미리보기 상자는 사진과 정확히 같은 크기여야 동그라미 위치가 맞는다 */
+.pvbox{position:relative;display:inline-block;max-width:100%;line-height:0}
+.pvbox img{display:block;width:auto;height:auto;max-width:100%;max-height:200px;background:#EEF2F6;border-radius:7px}
+/* 미리보기와 편집기 양쪽에서 함께 쓰는 표시 */
+.mk{position:absolute;box-sizing:border-box;border:3px solid #FF0000;border-radius:50%;
+  aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;z-index:1}
+.ovl{position:fixed;inset:0;background:#0D1B27;z-index:50;display:flex;flex-direction:column}
+.ovl[hidden]{display:none}   /* display:flex 가 hidden 속성을 덮어쓰지 않도록 */
+.ovl .top{display:flex;gap:8px;align-items:center;padding:10px 14px;background:#12283A;color:#fff;
+  padding-top:max(10px,env(safe-area-inset-top))}
+.ovl .top .t{flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ovl .stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px}
+.ovl .inner{position:relative;max-width:100%;max-height:100%}
+/* 사진을 최대한 크게 띄워야 표시할 지점을 정확히 누를 수 있다 */
+.ovl .inner img{display:block;width:auto;height:auto;max-width:100%;
+  max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);cursor:crosshair}
+.ovl .bot{display:flex;gap:9px;padding:12px 14px;background:#12283A;
+  padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.ovl .bot .btn{flex:1;white-space:nowrap;padding:13px 8px;font-size:13.5px}
 </style>
 </head>
 <body>
+
 <div class="bar">
+  <button class="clr" id="backBtn" onclick="back()" style="display:none">← 뒤로</button>
   <div class="tt">
-    <h1>지중표시기 현장사진 정리</h1>
-    <div class="sub">촬영하면 엑셀 양식으로 자동 정리</div>
+    <h1 id="barTitle">현장사진 정리</h1>
+    <div class="sub" id="barSub">할 일을 고르세요</div>
   </div>
-  <button class="clr" onclick="resetAll()">전체 지우기</button>
+  <button class="clr" id="clearBtn" onclick="clearCurrent()" style="display:none">전체 지우기</button>
 </div>
+
 <div class="wrap">
   <div id="msg"></div>
 
-  <div class="card">
-    <h2><span class="n">1</span> 협력사</h2>
-    <div id="partnerView" style="display:none">
-      <span class="tag" id="partnerText"></span>
-      <button class="btn w" style="padding:7px 13px;font-size:12.5px;margin-left:8px" onclick="editPartner()">변경</button>
-      <div class="hint">한 번 지정하면 이 기기에서는 계속 이 값이 쓰입니다.</div>
+  <!-- ===================== 홈 ===================== -->
+  <section id="scr-home">
+    <div class="jobs">
+      <button class="job" onclick="go('marker')">
+        <span class="ico">지</span>
+        <span class="tx"><b>지중표시기 보강</b><span>현장 작업사진을 찍어 작업사진 양식으로 정리</span></span>
+        <span class="go">›</span>
+      </button>
+      <button class="job" onclick="go('manhole')">
+        <span class="ico">맨</span>
+        <span class="tx"><b>IoT 맨홀 점검</b><span>점검결과·조치사진을 IOT 맨홀 시설 점검표로 정리</span></span>
+        <span class="go">›</span>
+      </button>
+      <button class="job" onclick="go('audit')">
+        <span class="ico">국</span>
+        <span class="tx"><b>과기부 국사 수검</b><span>월별로 국사를 모아 정산요청 세부 양식으로 정리</span></span>
+        <span class="go">›</span>
+      </button>
     </div>
-    <div id="partnerEdit">
-      <input type="text" id="partner" placeholder="예: SKO 강남전송운용팀">
-      <div class="hint">엑셀 상단 “◇ 협력사 :” 뒤에 들어갑니다.</div>
-      <div style="margin-top:10px"><button class="btn" onclick="savePartner()">저장</button></div>
+    <div class="card" style="margin-top:16px">
+      <div class="hint">
+        찍은 사진과 만들어진 엑셀은 <b>이 기기 안에만</b> 저장됩니다. 서버로 전송되지 않습니다.<br>
+        작성하던 내용은 자동으로 저장되므로 앱을 닫았다 열어도 이어서 할 수 있습니다.
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2><span class="n">2</span> SK관리번호</h2>
-    <input type="text" id="mgmtNo" placeholder="예: SK-2026-강남-0142" oninput="touch()">
-    <div class="hint">엑셀의 SK관리번호 칸에 그대로 들어갑니다.</div>
-  </div>
+  <!-- ===================== 1. 지중표시기 ===================== -->
+  <section id="scr-marker" hidden>
+    <div class="card">
+      <h2><span class="n">1</span> 협력사</h2>
+      <div id="partnerView" style="display:none">
+        <span class="tag" id="partnerText"></span>
+        <button class="btn w sm" style="margin-left:8px" onclick="editPartner()">변경</button>
+        <div class="hint">한 번 지정하면 이 기기에서는 계속 이 값이 쓰입니다.</div>
+      </div>
+      <div id="partnerEdit">
+        <input type="text" id="partner" placeholder="예: SKO 강남전송운용팀">
+        <div class="hint">엑셀 상단 “◇ 협력사 :” 뒤에 들어갑니다.</div>
+        <div style="margin-top:10px"><button class="btn" onclick="savePartner()">저장</button></div>
+      </div>
+    </div>
 
-  <div class="card">
-    <h2><span class="n">3</span> 작업수량 (신설)</h2>
-    <div class="seg">
-      <button id="qmAuto" onclick="setQtyMode('auto')">사진 수 자동</button>
-      <button id="qmManual" onclick="setQtyMode('manual')">직접 입력</button>
+    <div class="card">
+      <h2><span class="n">2</span> SK관리번호</h2>
+      <input type="text" id="mgmtNo" placeholder="예: SK-2026-강남-0142" oninput="mkTouch()">
+      <div class="hint">엑셀의 SK관리번호 칸에 그대로 들어갑니다.</div>
     </div>
-    <div id="qtyAutoBox" class="hint" style="margin-top:9px">현재 사진 <b id="qtyAutoVal">0</b>장이 그대로 들어갑니다.</div>
-    <div id="qtyManualBox" style="display:none">
-      <input type="number" id="qtyManual" min="0" placeholder="숫자 입력" oninput="touch()">
-    </div>
-  </div>
 
-  <div class="card">
-    <h2><span class="n">4</span> 작업사진</h2>
-    <div class="row">
-      <button class="btn" style="flex:1" onclick="cam.click()">사진 촬영</button>
-      <button class="btn w" style="flex:1" onclick="alb.click()">앨범에서 선택</button>
+    <div class="card">
+      <h2><span class="n">3</span> 작업수량 (신설)</h2>
+      <div class="seg">
+        <button id="qmAuto" onclick="setQtyMode('auto')">사진 수 자동</button>
+        <button id="qmManual" onclick="setQtyMode('manual')">직접 입력</button>
+      </div>
+      <div id="qtyAutoBox" class="hint" style="margin-top:9px">현재 사진 <b id="qtyAutoVal">0</b>장이 그대로 들어갑니다.</div>
+      <div id="qtyManualBox" style="display:none">
+        <input type="number" id="qtyManual" min="0" placeholder="숫자 입력" oninput="mkTouch()">
+      </div>
     </div>
-    <input type="file" id="cam" accept="image/*" capture="environment" multiple onchange="addFiles(this)">
-    <input type="file" id="alb" accept="image/*" multiple onchange="addFiles(this)">
-    <div class="hint">앨범에서 <b>여러 장을 한 번에</b> 고를 수 있습니다. 사진이 늘면 엑셀 칸이 오른쪽으로 계속 늘어납니다.</div>
 
-    <label style="margin-top:14px">사진 순서</label>
-    <div class="seg sm">
-      <button id="sm_time" onclick="setSortMode('time')">촬영 시각순</button>
-      <button id="sm_name" onclick="setSortMode('name')">파일 이름순</button>
-      <button id="sm_pick" onclick="setSortMode('pick')">고른 순서</button>
+    <div class="card">
+      <h2><span class="n">4</span> 작업사진</h2>
+      <div class="row">
+        <button class="btn" style="flex:1" onclick="mkCam.click()">사진 촬영</button>
+        <button class="btn w" style="flex:1" onclick="mkAlb.click()">앨범에서 선택</button>
+      </div>
+      <input type="file" id="mkCam" accept="image/*" capture="environment" multiple onchange="mkAddFiles(this)">
+      <input type="file" id="mkAlb" accept="image/*" multiple onchange="mkAddFiles(this)">
+      <div class="hint">앨범에서 <b>여러 장을 한 번에</b> 고를 수 있습니다. 사진이 늘면 엑셀 칸이 오른쪽으로 계속 늘어납니다.</div>
+
+      <label style="margin-top:14px">사진 순서</label>
+      <div class="seg sm">
+        <button id="sm_time" onclick="setSortMode('time')">촬영 시각순</button>
+        <button id="sm_name" onclick="setSortMode('name')">파일 이름순</button>
+        <button id="sm_pick" onclick="setSortMode('pick')">고른 순서</button>
+      </div>
+      <div class="hint" id="sortHint"></div>
+      <div class="hint">미리보기는 <b>엑셀에 들어갈 모양 그대로</b>입니다. (칸에 꽉 차도록 위아래·좌우가 조금 잘립니다)</div>
+      <div id="photos"></div>
     </div>
-    <div class="hint" id="sortHint"></div>
-    <div class="hint">미리보기는 <b>엑셀에 들어갈 모양 그대로</b>입니다. (칸에 꽉 차도록 위아래·좌우가 조금 잘립니다)</div>
-    <div id="photos"></div>
-  </div>
+  </section>
+
+  <!-- ===================== 2. IoT 맨홀 점검 ===================== -->
+  <section id="scr-manhole" hidden>
+    <div class="card">
+      <h2><span class="n">1</span> 기본 정보</h2>
+      <label>점검자</label>
+      <input type="text" id="mhTester" placeholder="예: 강남전송운용팀_홍길동,김철수" oninput="mhTouch()">
+      <div class="hint">이 <b>기본 정보만</b> 다음에 열었을 때 그대로 채워집니다.
+        점검항목·사진·조치내용은 맨홀마다 새로 쓰는 값이라 매번 비워진 상태로 시작합니다.
+        (사진은 <b>새로고침에는 살아남고</b>, 앱을 새로 열 때만 지워집니다)</div>
+      <label>점검일</label>
+      <input type="date" id="mhDate" onchange="mhDateChanged()">
+      <div class="hint">엑셀 <b>시트 이름</b>이 이 날짜를 따라갑니다 → <b id="mhSheetName">—</b></div>
+      <label>맨홀 SK관리번호</label>
+      <input type="text" id="mhNo" placeholder="예: 동안구MH600" oninput="mhTouch()">
+      <label>수리항목 <span class="cnt">(여러 개 고를 수 있음)</span></label>
+      <div id="mhRepairs" class="chips"></div>
+      <input type="text" id="mhRepairEtc" style="margin-top:9px"
+             placeholder="직접 입력 — 목록에 없는 것 (여러 개는 쉼표로)" oninput="mhEtc()">
+    </div>
+
+    <div class="card">
+      <h2><span class="n">2</span> 현장 점검항목</h2>
+      <div id="mhChecks"></div>
+      <div class="hint">모두 <b>양호</b>가 기본입니다. 불량인 것만 눌러 바꾸세요. 고른 쪽에 빨간 동그라미가 그려집니다.</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">3</span> 사진</h2>
+      <div id="mhSlots"></div>
+      <div class="hint">사진은 <b>칸 크기에 꽉 차게</b> 들어갑니다. 고장원인 칸은 <b>2장까지</b> 넣을 수 있고, 2장이면 좌·우 반반으로 놓입니다.<br>
+        피해 지점에 빨간 동그라미를 넣으려면 <b>고장원인 칸에 사진을 먼저 넣고</b>, 사진이나 <b>🔴 표시하기</b> 단추를 누르세요.
+        사진이 크게 열리면 <b>표시할 자리를 누르면</b> 됩니다. (PC는 마우스 클릭, 휴대폰은 손가락)<br>
+        사진은 <b>새로고침해도 그대로 남습니다.</b> 다만 <b>앱을 닫았다 다시 열면</b> 다음 맨홀을 위해 지워집니다.</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">4</span> 조치 내용</h2>
+      <label>고장원인 <span class="cnt">(여러 개 고를 수 있음)</span></label>
+      <div id="mhCauses" class="chips"></div>
+      <input type="text" id="mhCauseEtc" style="margin-top:9px"
+             placeholder="직접 입력 — 목록에 없는 것 (여러 개는 쉼표로)" oninput="mhEtc()">
+      <label>조치 이력 <span class="cnt">(수리항목에서 자동으로 들어감)</span></label>
+      <div id="mhActionView" class="ro"></div>
+      <label>기타 특이사항</label>
+      <textarea id="mhNote" placeholder="없으면 비워 두세요" oninput="mhTouch()"></textarea>
+    </div>
+  </section>
+
+  <!-- ===================== 3-1. 국사 수검 : 월 목록 ===================== -->
+  <section id="scr-audit" hidden>
+    <div class="card">
+      <h2>정산 월</h2>
+      <div class="row">
+        <input type="text" id="auNewYm" placeholder="예: 2026-08" style="flex:1;min-width:150px">
+        <button class="btn" onclick="auAddMonth()">월 추가</button>
+      </div>
+      <div class="hint">월마다 따로 관리됩니다. 한 달 안에서 국사를 추가하면 엑셀에서 <b>오른쪽으로 한 칸씩</b> 늘어납니다.</div>
+      <div id="auMonths"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 3-2. 국사 수검 : 국사 목록 ===================== -->
+  <section id="scr-month" hidden>
+    <div class="card">
+      <h2>국사 추가</h2>
+      <label>지역</label>
+      <select id="auNewRegion"></select>
+      <label>국사명</label>
+      <input type="text" id="auNewSite" placeholder="예: 안산원곡통합국">
+      <div style="margin-top:12px"><button class="btn full" onclick="auAddSite()">국사 추가</button></div>
+    </div>
+    <div class="card">
+      <h2>정산 단가</h2>
+      <label>국사 1곳당 금액 (원)</label>
+      <input type="number" id="auUnit" min="0" step="1000" placeholder="국사 1곳당 금액을 입력하세요" oninput="auUnitChanged()">
+      <div class="hint">한 번 넣으면 이 기기에서 다음에도 그대로 쓰입니다.
+        비워 두면 엑셀의 정산금액 칸도 비워진 채로 만들어집니다.</div>
+    </div>
+
+    <div class="card">
+      <h2>등록된 국사 <span class="cnt" id="auSiteCnt"></span></h2>
+      <div id="auSites"></div>
+      <div class="hint">국사 1곳당 사진칸은 <b>전경 3 + 맨홀 수 × 4</b>개입니다 (맨홀 4개면 19칸). 칸마다 2장까지 넣을 수 있습니다.</div>
+      <div id="auSummary" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 3-3. 국사 수검 : 국사 편집 ===================== -->
+  <section id="scr-site" hidden>
+    <div class="card">
+      <h2>국사 정보</h2>
+      <label>지역</label>
+      <select id="auSiteRegion" onchange="auSaveSiteInfo()"></select>
+      <label>국사명</label>
+      <input type="text" id="auSiteName" oninput="auSaveSiteInfo()">
+      <label>점검 맨홀 수</label>
+      <div id="auManholeBox"></div>
+    </div>
+    <div id="auSiteSlots"></div>
+  </section>
 </div>
 
 <div class="foot"><div class="in">
   <span class="st" id="status">자동 저장됨</span>
-  <button class="btn" id="makeBtn" onclick="makeExcel()">엑셀 만들기</button>
+  <button class="btn" id="actBtn" onclick="footAction()">엑셀 만들기</button>
 </div></div>
+
+<!-- ===== 사진에 빨간 동그라미 표시하기 ===== -->
+<div class="ovl" id="markOvl" hidden>
+  <div class="top">
+    <span class="t" id="markTitle"></span>
+    <div class="seg tiny" style="flex:none;width:170px;border-color:#3A5C77">
+      <button id="mkSz0" onclick="markSize(0)">작게</button>
+      <button id="mkSz1" onclick="markSize(1)">보통</button>
+      <button id="mkSz2" onclick="markSize(2)">크게</button>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="inner" id="markInner" onclick="markAdd(event)">
+      <img id="markImg" alt="">
+    </div>
+  </div>
+  <div class="bot">
+    <button class="btn g" onclick="markUndo()">되돌리기</button>
+    <button class="btn r" onclick="markClear()">전부 지우기</button>
+    <button class="btn" onclick="markDone()">완료</button>
+  </div>
+</div>
 
 <script>
 
 /* ===== 엑셀 양식(원본 xlsx)을 그대로 내장 ===== */
-const TEMPLATE_B64 = "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";
+const TPL_MARKER  = "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";
+const TPL_MANHOLE = "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";
+const TPL_AUDIT   = "UEsDBBQAAAAIAGmQHF2/EAetFQEAABgDAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbK2SzW5CIRBGX4WwNYJ20TSNVxf9WbZd2AeYcud6iTAQZtTr2zeibhpbF3XDLPg454MwWwwxqC0W9okaPTUTrZBcaj2tGv25fB0/aMUC1EJIhI3eI+vFfLbcZ2Q1xEDc6F4kP1rLrscIbFJGGmLoUokgbFJZ2QxuDSu0d5PJvXWJBEnGcmDo+ewZO9gEUS+DIB17FAys1dMxeHA1GnIO3oH4RHZL7Q/L+GQwBUPNcO8zj4YYtL1oOOz8Ljide99iKb5F9QFF3iBio+0Q7C6V9VdKa/M35ELL1HXeYZvcJiKJ4VwQWu4RJQZTp4ngaXTdX8Ns65jeuMjuzL/Sg2UfkG/9ChV6xSw9Rjyu/798xZyFtv7s+TdQSwMEFAAAAAgAaZAcXZja64uxAAAAJwEAAAsAAABfcmVscy8ucmVsc43PQW7CMBCF4atYs28cukAIxWGDkLKtwgGMM0ms2DOWx4C5fbel6qL7p+/p7041BvXALJ7JwK5pQSE5njwtBq7j5eMASoqlyQYmNPBCgVPffWGwxTPJ6pOoGgOJgbWUdNRa3IrRSsMJqcYwc462SMN50cm6zS6oP9t2r/NPA95NNUwG8jDtQI2vhP+xeZ69wzO7e0Qqf1z8WoAabV6wGKhBPzlvN+atqTGA7jv9Fth/A1BLAwQUAAAACABpkBxdm8CALu0AAABEAQAADwAAAHhsL3dvcmtib29rLnhtbI2QwUrEMBRFfyW8vU3rQqQ0nYUiDAi60A+Iyes0TJJX8jJadyJ+gm5c+QOCuBD/yX6E2JnZu7qbc8+F2yzG4MUtJnYUFVRFCQKjIeviSsH11dnBMQjOOlrtKaKCe2RYtM0dpfUN0VqMwUdW0Oc81FKy6TFoLmjAOAbfUQo6c0FpJXlIqC33iDl4eViWRzJoF2FrqNN/HNR1zuApmU3AmLeShF5nR5F7NzC0zbzAuxRRB1Qwvb1Mjx/T6/P0+S6mp++frwcQM7C0CioQqXZWQVraCmTbyL3DaG8uk+g23p9oby7iOem58AftL2h/AVBLAwQUAAAACABpkBxdSrhvQtQAAAArAgAAGgAAAHhsL19yZWxzL3dvcmtib29rLnhtbC5yZWxzrZHBasMwEER/Rey9lp1CKSVKLqWQa3A/QMhrS0TSCu02tf++kEDSQCg95LTMHOYNO+vtnKI6YuVA2UDXtKAwOxpCngx89h9Pr6BYbB5spIwGFmTYbtZ7jFYCZfahsJpTzGzAi5Q3rdl5TJYbKpjnFEeqyQo3VCddrDvYCfWqbV90/Z0Bt5lqNxiou6ED1S8F/5NN4xgcvpP7SpjlDkJ/Uz2wRxRQva0TioGLxfp0umZOEfT9MqtHlmFZIvK1yVn/hX9+JF48JrzST/JsXl6gb0be/ABQSwMEFAAAAAgAaZAcXXS1l9AlIwAAuT4BABgAAAB4bC93b3Jrc2hlZXRzL3NoZWV0MS54bWzFnW2PI9eZnr8HyH8gGCDYfNBMF9/JTM/CzTpvSLIwot31x6DVw5Ea7m5O2NTbBgHGshIIawNeA6tdGZAXWkCJnUABvF7Z8AbOH5pu/YfgFFlkPc+5aM1QdbQfLE9f5+7z1Lm7uurcZLOeR3/83vVV553F6vZyeXPaLR6cdDuLm4vlk8ubN0+7f/an9rVJt3O7Pr95cn61vFmcdt9f3Hb/+PG//BeP3l2uvn/71mKx7rx3fXVze9p9a71+Nnv48PbircX1+e2D5bPFzXvXV0+Xq+vz9e2D5erNh7fPVovzJ9U3XV897J2cjB5en1/edDczzFYvM8fy6dPLi0W5vHj7enGz3kyyWlydry+XN7dvXT67rWe7vniZ6a7PV99/+9lrF8vrZ+fryzcury7X71eTdjvXF7Pw5s1ydf7G1eK0+14xOL/ovLfqvLfqdd5b9esyFU8qXV9erJa3y6frBxfL6+0xp8ufPpw+PL/YzbQ6bppi8HC1eOcy/gD3U/WOnGu4m6u3n6x/5GSj3WTRrtXs7csnp93/Mi/sfNQfjF87mUx6rw2G/eK175iT0WumPzD9+XQyGg+K/9p9/Kia6Lurx4/W52/Ml1fLVWf15hunXWunvfJkeNJ9+PjRw53myeX14iZW6qwWT0+73ylmoTcYRU0l+fPLxbu3jX931udvvL64WlysF09Ou0W3s14++/eLp+v54urqtPudPym6nb9YLq9fvziPP/vxSePLP4lnz9UGxt+BN5bL78cpw5PT7kk87GraeCTnF+vLdxbbKb837HZu//Pm4L433B98/Nbmv+ujtNVJ+t1V58ni6fnbV+v/uHzXLy7ffGt92i1GD4bdTnXizZ68Xy5uLxY369PuyYN+nPZieXVb/bdzfRl/o7ud6/P3qv9/9/LJ+q3T7jT+Qr8f17UxaCftbaXTnbR38mDUGzb1nYu3b9fL6+9txgvx/cVJXStas1EMXmmC3cFOjj2EaT3D9LhD6NVr6I2PPITepJ5hcuQh1Gvoj448hP64nmF83CH06zUMhkceQhzezDA67hAG9RqGgyMPYTisZxgedwjDeg2j/pGHMBrUMwyOO4RRvYZx78hDGPfrGfrHHcK4XsOkOPIQJvWFJf7jmEOY1GuYnhx5CNP6yhL/ccwhTHcXx+OvjvvL47HXx5PdBfLk6Cvkye4SGf/1dfeEYn9RL469Ihbxcr6dY/IyJXdH2Dv2CljEy/d2jvFLlNxdtIv+sVe8Il6ut3OMXqLk7iJdDI69whXx8rydY/gSJXcX5WJ47BWtiJfj7RyDlyi5uwgXo2OvYEW8/G7n6E8OF3242flUu6fyfH3++NFq+W5nVW19bp+dx4hSzOJF7HZzd9mU3OyzKlHcW/VGD3qHNlePH13E6b6zmWI0ro4ykrMNKYY7Mt+Q/g6UtaTYIZPMYxPiEuITEprk4Wr57m7hvVdYeDH++oXH+U67o8l+4RvS63c769Pu5c3V5c3i9fWq+/jR5e3jR1UynN0+O79YnHafrRa3i9U7i+7jF7/54u63Hz56uH786GGUPbyoTdvONniV2e4/+/j+g1/d/fj5/Q9/AHOWx8/54ncf3X/89zCn2cxZ7H2wCXG95AeXkNA79IPrt/yD6yc/uA3pFa9ky0ef3P3kwxe//TH97LYT9vZn/JbsfylMP/EtIa6f+JaQ0D/k26Bl3waJb4MjfLv7yc/ufvucTBskpg0S0waJaQlxg8S0hITBIdOGLZs2TEwbHnOyffjpAdOGiWnDxLRhYlpC3DAxLSFheMi0UcumjRLTRseY9vlPD5g2SkwbJaaNEtMS4kaJaQkJo0OmjVs2bZyYNj7ifvTVx//rxT/i/Wg722Bv2paM9qaNE9MS4saJaQkJ40OmTVo2bZLsXjakmO53LxvSO9kvfKIXZRJiE+KSWj4hYXJo4dOWFz5NFr4hxf6nOd+SvaacJgtPiE2IS2r5hIQdeaWdyV+9+PXzzv2PPr//7Aedu1/8+Ksf/L5z/8l/v//093d//2nn7i8/uf/bLzr3f/fT+w//ofOv31z/W/qfPNWF5zHttbtXPkk3yxtUvNKW7MWvnj/o7DYgnc0OrXNw2zffFmluwJMjMSmyKXIp8ikKAklPXyl/nLyEpxBANmjcOJVTVZkikyKbIpcin6IgkLSg17YFaRTZol5Mwq/8C/XiN//n/oMvOvefffji1/8Pz6f97Hs7W6h497//21c//isKGVDRHlfx9X/3p/effnb/4WedcPN0dd756mcf3//8d390/5ef3//fv777x9/9GyjvoLyvXW/+zA9mmOJlQ8wf/kGn0WWLeoP9fXkOrARmgFlgDpivD6W5+oNJJF7dWlh9GkC2SK4+ZSUwA8wCc8B8fSjN1R+MFMWwldWnSWKL5OpTVgIzwCwwB8zXh9Jc/cFsUIxaWX0aCbZIrj5lJTADzAJzwHx9KM3VH9zkx5eJW1h9urffIrn6lJXADDALzAHz9aE0V39wtx5f4G5h9ZN09RNYfcpKYAaYBeaA+fpQmqs/uGWPr9y3sPppuvoprD5lJTADzAJzwHx9KM3VTw++3Pqym+c//CLrSfoq60m6emAlMAPMAnPAfH0ozZcsD25z4ysVLaw+3dtu0WC/l5+nqEy/0aTIpsilyKcoCCTX3fbetppQWbBB49GrbPt6DzrbvebdL3751c+e/6f7H3364h++vP+7/3H/T5/gy+9J4TJFJkU2RS5FPkVBIOlqv21Xk93b2RYdt3/feNr5VwU6uZ95b2Ub1Xr4dkRazbZSrU/BAKr5VqoNoFqQ1eQp0soWu5pFnRewxQZWAjPALDAHzAMLksn1t7LJrmZR64dNNrASmAFmgTlgHliQTK6/lW12NYtaP2yzgZXADDALzAHzwIJkcv2tbLSrWdT6YaMNrARmgFlgDpgHFiST629lq13NotYPW21gJTADzAJzwDywIJlcfyub7WoWtX7YbAMrgRlgFpgD5oEFyeSb5K1st6tZ5Pq3SKwfWAnMALPAHDAPLEgm19/KhruaRa2/gPWnrARmgFlgDpgHFiST6++1sv50t52ieYrKFJkU2RS5FPkUBYHkutveGlcTKgv6RwSO/oPO/Qdf3P3o87v/+UXn7lc/2eWOf/rl/Ufxjam73z7/o/u/+en9R5/QS87z9DjKFJkU2RS5FPkUBYGkyYO2TU73mVuUIX80Zt5bOciVP6CabaUa5g+o5luphvlDVpOnSCv772oWdV7A/htYCcwAs8AcMA8sSCbX38r+u5pFrR/238BKYAaYBeaAeWBBMrn+Vvbf1Sxq/bD/BlYCM8AsMAfMAwuSyfW3sv+uZlHrh/03sBKYAWaBOWAeWJBMrr+V/Xc1i1o/7L+BlcAMMAvMAfPAgmTyjy1b2X9Xs8j1b5FYP7ASmAFmgTlgHliQTK6/lf13NYtaP+y/gZXADDALzAHzwIJkcv2t7L+rWdT6e7D+lJXADDALzAHzwIJkcv2t/IFDNYtaf4LmKSpTZFJkU+RS5FMUBJLrbntrXE2oLBgckT8GDzpfffzL+19/WYWP+98/v//5l3e/++v4x2Ixkdz/8Adf/fBT/DPs5ADKFJkU2RS5FPkUBYGku8O23U03mFuUIXg0Zt5bOcwVPKCabaUaBg+o5luphsFDVpOnSCsb72oWdV7AxhtYCcwAs8AcMA8sSCbX38rGu5pFrR823sBKYAaYBeaAeWBBMrn+Vjbe1Sxq/bDxBlYCM8AsMAfMAwuSyfW3svGuZlHrh403sBKYAWaBOWAeWJBMfmCnlY13NYtc/xaJ9QMrgRlgFpgD5oEFyeT6W9l4V7Oo9cPGG1gJzACzwBwwDyxIJtffysa7mkWtHzbewEpgBpgF5oB5YEEyuf5WNt7VLGr98JfFwEpgBpgF5oB5YEEyuf5W/vChmkWtP0HzFJUpMimyKXIp8ikKAsl1t701riZUFgyPCB7DB50XXz5/8ZsvHt598OWLL5+r/HH3i49e/Ir+xn+eHkCZIpMimyKXIp+iIJB0d9S2u+kGc4syBI/GzHsrR7mCB1SzrVTD4AHVfCvVMHjIavIUaWXjXc2izgvYeAMrgRlgFpgD5oEFyeT6W9l4V7Oo9cPGG1gJzACzwBwwDyxIJtffysa7mkWtHzbewEpgBpgF5oB5YEEy+aHvVjbe1Sxy/Vsk1g+sBGaAWWAOmAcWJJPrb2XjXc2i1g8bb2AlMAPMAnPAPLAgmVx/Kxvvaha1fth4AyuBGWAWmAPmgQXJ5Ppb2XhXs6j1w8YbWAnMALPAHDAPLEgm19/KxruaRa0f/uIYWAnMALPAHDAPLEgm19/cgMcn0h23/nTXnaJ5isoUmRTZFLkU+RQFgeS6Ry+57pf9VHw1obJgdMSn4u8++ORBZ/N4ma//SPy2QuMzM+lhmBTZFLkU+RQFgaSh41ZOpHQjuUXNz8GnqjJFJkU2RS5FPkVBILnuyaucSC+RsaoJ1XNjtvu3+AJK+5+D383ePI1aqHj4c/BQ0R5X8ajPwUN5X7ve/Jkf/EzkaNrKuZ5+JnKLto853v54atY821OdAZ0FnQOdrw+lufqDn4mMT0n+5quvZlFP+qm3qXs237H9o2xK0BnQWdA50Pn6UBqrF0iuvmhl9UW6+gJWX8DqU50BnQWdA52vD6W5+oOfjKwW/M1Xnz7qY4vk6nuw+lRnQGdB50Dn60Nprv7gn2nH5+22sPr0+RdbJFffh9WnOgM6CzoHOl8fSnP1B/9IJD41uIXVp8+/2CK5+gGsPtUZ0FnQOdD5+lCaqz/4SvW4lY1yNYta/RBWP4TVpzoDOgs6BzpfH0pz9Qe3y/HF8xZWnz7/Yot6m4f/b1dfs/2DVUvQGdBZ0DnQ+fpQmqs//JC7Vva243Rvu0XNz8GnqEy/0aTIpsilyKcoCCTXPWll3emLo1uU+cPvaeEyRSZFNkUuRT5FQSBp5ctuGffdIDZDuw4RX+dy+hLsFh23if+Db83sZm6epW1Uw7dmoJptpRq+NQPVfCvV8K0ZWU0+JfIk8ylTFZCnzBaJALJjjd8j0BnQWdA50HnQBamT1hS5rUlf0N4icZ/escZ9GnQGdBZ0DnQedEHqpDW93Nakr3VvkbQGNu+gM6CzoHOg86ALUiet6ee2Jn0ZfIukNbCzB50BnQWdA50HXZA6ac0gtzXpK+RbJK2BbT/oDOgs6BzoPOiC1ElrhrmtSV883yJpDWQC0BnQWdA50HnQBamT1oxyW5O+qL5F0poRWJPqDOgs6BzoPOiC1ElrxrmtSdPEFokstWONLAU6AzoLOgc6D7ogddKaSW5r4HnYCZqnqEyRSZFNkUuRT1EQSFqSOx1UBZQl03+G5wGkx1GmyKTIpsilyKcoCCQfRp57f10VkKZvUYZItpu5EclaqYaRDKrZVqphJINqvpVqGMlkNXnK5M4dVQF1ytR7/eYz7WvW+D0CnQGdBZ0DnQddkDppTe7cURVQ1kDu2LHGXgB0BnQWdA50HnRB6qQ1uXNHVUBZA7ljx5rWQO4AnQWdA50HXZA6aU3u3FEVUNZA7tixpjWQO0BnQedA50EXpE5akzt3VAWUNZA7dqxpDeQO0FnQOdB50AWpk9bkzh1VAWUN5I4da1oDuQN0FnQOdB50QeqkNblzR1VAWTMGa8ZgTaozoLOgc6DzoAtSJ63JnTuqAsqaSRrJdqwRyUBnQGdB50DnQRekTlqTO39UBZQ1CZqnqEyRSZFNkUuRT1EQSLXNyR0PNhWkKTX7lp6SAIdQAjPALDAHzAMLkinfc++xNxW070WuYLafWnQuKnJFM6pn26mH4Yzq+XbqYTxT9dTJkzuFbCrok6fe+zd7Ne2g+N1KlYaUlpSOlJ6UQSmVSbnzyKaCNgkSyR42tgmkNKS0pHSk9KQMSqlMyp1MNhW0SZBN9lCYBOmElJaUjpSelEEplUm5M8qmgjYJUsoeCpMgp5DSktKR0pMyKKUyKXda2VTQJkFe2UNhEiQWUlpSOlJ6UgalVCblzi2bCtokSC57KEyC7EJKS0pHSk/KoJTKpNwJZlNBmzQhkyZkUqo0pLSkdKT0pAxKqUzKnWU2FbRJ0zTo7WEj6ZHSkNKS0pHSkzIopepfmT3cUJfQlM2BlcAMMAvMAfPAgmTKnOwJBNt9Ft/mYyrgEEpgBpgF5oB5YEEy5Xv2zXva7fKsZjmS327qZvJrpR4nP6hn26nHyQ/q+XbqcfKT9dTJ0ww1xSjL2QOpZtdVVLTpraH45UqVhpSWlI6UnpRBKZVLg/wuQazZdR9tbiF2sLmFAKUhpSWlI6UnZVBK5dIwv0uQa3ZdSoVLlGtAaUhpSelI6UkZlFK5NMrvEgSbXTdT4RIFG1AaUlpSOlJ6UgalVC6N87sEyWbX9VS4RMkGlIaUlpSOlJ6UQSmVS5P8LkG02XVHFS5RtAGlIaUlpSOlJ2VQSuXSNL9LkG12XVSFS1NyKVUaUlpSOlJ6UgalVI3pT7K7lHZRPauZTIA72EyAoDSktKR0pPSkDEqpXCpe1qWvsQKiTMrmwEpgBpgF5oB5YEEyZUEv/4kCgWPLXvGxID/6/EHn/sNPX+qxIHWJZuyAtq/ALDAHzAMLkimv82/PoR1szZoPDwFdCcwAs8AcMB9Zw5aDH6kuRMPTTLbAfrxuQZrngSL76cUJOMj5SBGqaY+sedRDRegAPJgfIkvPg/yJA7rC1kym1x0UvyCp0pDSktKR0sMRBcmUR/nzBnSOrZnc/exgc/cDSkNKS0pHSh9hw5wRuJI/X0A/2ZopVyhfgNKQ0pLSkdLDEQXJlEf50wX0nK2Z8ojSBSgNKS0pHSk9HFGQTHmUP1tAX9qaKY8oW4DSkNKS0pHSwxEFyaRHoj1tHo+gd23NpEc72PQIlIaUlpSOlB6OKEimPCryewSRY9dUVngEH88mpSGlJaUjpY+wYc7hxCH622YyBxLHlslouoPNaApKQ0pLSkdKH2HDnMMRQTTBzWQORIQtaz6DJbKGJ5ANoGMtMAfMAwvbgsqP/NkAOtjWLPOzWaB0GVnD4rQBATAHzAMLkimn8+++oSdszXK887ibWpzIw2zvPEI92049fucR6vl26vE7j7KeOnvy5xLoqFszmd12UPxapUpDSktKR0pPyqCUyqX8OQX67tZM7Qsop4DSkNKS0pHSkzIopXIpf1KB7rw1Uy5RUgGlIaUlpSOlJ2VQSuVS/qwCPXxrplyirAJKQ0pLSkdKT8qglNIl0cw3j0vQ6bdm0qUdbLoESkNKS0pHSk/KoJTKpfx5BfoB10y5RHkFlIaUlpSOlJ6UQSmVS/mDC3QNrplyCT7hTUpDSktKR0pPyqCUyqX8CQZ6C9dMxrsdbMY7UBpSWlI6UnpSBqVULuXPNdB+GNgcWAnMALPAHDAPLEim3MmfRaB9cM2+3afBwJGUwAwwC8wB88CCZMr//Lt5aNNbsxxZcDd1Mwu2Uo+zINSz7dTjLAj1fDv1OAvKeursyZ9yoMlxzWQW3EHx25UqDSktKR0pPSmDUiqX8qccaIVcM7WboJQDSkNKS0pHSk/KoJTKpfwpBxom10y5RCkHlIaUlpSOlJ6UQSmlS6Jzch6XoK1yzaRLO9h0CZSGlJaUjpSelEEplUv5Uw40X66ZcolSDigNKS0pHSk9KYNSKpfypxxo0Vwz5RKlHFAaUlpSOlJ6UgalVC7lTznQyLlmyiX6/DgoDSktKR0pPSmDUiqX8qccaPdcM5kFd7CZBUFpSGlJ6UjpSRmUUrmUP+1AR2hg88ga5kAIgZ7NzW9yIPDAgmTKj/zpA3o41+zbeupMegglMAPMAnPAPLAgmTI+/8YdmiTXLEfs203djH2t1OPYB/VsO/U49kE93049jn2ynjp78gcaaDFdMxn7dlD8dqVKQ0pLSkdKT8qglMql/IEGGlHXTG0cKNCA0pDSktKR0pMyKKV0SXSkzuMStKuumXRpB5sugdKQ0pLSkdKTMiilcil/oIGm1jVTLlGgAaUhpSWlI6UnZVBK5VL+QAOtr2umXKJAA0pDSktKR0pPyqCUyqX8gQYaZNdMuUSBBpSGlJaUjpSelEEplUv5Aw200a6Zcok+Og5KQ0pLSkdKT8qglMql/IEGmm3XTMa+HWzGPlAaUlpSOlJ6UgalVC7ljznQjxvYHFgJzACzwBwwDyxIptzJn0Wgz3bNvq0H0EATb2AGmAXmgHlgQTJlfP5tfNpn+qxmvfiuZMshsDF1w+U26nEIhHq2nXocAqGeb6ceh0BZT509+eNN2qf7rGa9wf6Pp+cES4KGoCXoCHqCQUHpkugenseltJ/3Wc2kSwBLgoagJegIeoJBQeVS/niT9v0+q5lyKYUlQUPQEnQEPcGgoHIpf7xJ+4Of1Uy5lMKSoCFoCTqCnmBQULmUP96kfcTPaqZcSmFJ0BC0BB1BTzAoqFzKH2/SfuNnNVMupbAkaAhago6gJxgUVC7ljzdpX/KzmimXUlgSNAQtQUfQEwwKKpfyx5u0f/lZzZRLKSwJGoKWoCPoCQYFlUsi5myfxd2ySxBzUjYHVgIzwCwwB8wDC5Ipdyb53YEssmWv+HCan//+Qef+85++3MNptiWab0tBW3ZgFpgD5oEFyZTX0/xew859y8TDaVJdCcwAs8AcMA8sSCbdEX3I87gDnchrdlyK+/pn1DSm3zvdRs0/8IwaqGmPrHncM2rgADyYHyRTp0OR/3SAaLJred68uQEsCRqClqAj6OGIgmTKo15+jyCY7HqfC48omAA0BC1BR9DDEQXJlEf9/B5BLNk1QRceUSwBaAhago6ghyMKkimPBvk9glCy64YuPKJQAtAQtAQdQQ9HFCRTHg3zewSRZNcWXXhEkQSgIWgJOoIejihIpjwa5fcIAsmuP7rwiAIJQEPQEnQEPRxRkEx5lD+OQM/2mimPUlgSNAQtQUfQwxEFyZRH+UMJNG+vmfIohSVBQ9ASdAQ9HFGQTHmUP0xAN/eaicfYpKyE7zXALDAHzAMLkkl3RNP1PO5A2/Wa5X6oTVq6BGaAWWAOmAcWJFOG59+uQ9PymuV4T7MxdcPlItt7mlDPtlOP39OEer6devyepqynzp78QQb6utdMXvABlgQNQUvQEfQEg4LKpfxRBlq810y5RFEGoCFoCTqCnmBQULmUP8xAt/eaKZcozAA0BC1BR9ATDAoql/LHGWj8XjPlEsUZgIagJegIeoJBQeVS/kADPeBrplyiQAPQELQEHUFPMCioXMofaaAdfM2USxRpABqClqAj6AkGBZVL+UMNdIavmXKJQg1AQ9ASdAQ9waCgcil/rIEm8TVTLtFfNwE0BC1BR9ATDAoKl3qiaXwWlzYlpEvA5sBKYAaYBeaAeWBBMuVO9iyyKaHdKf4Znm0DR1ICM8AsMAfMAwuSKf+z7+Y3JbT/vVxZsDl1w+VerixI9Ww79TALUj3fTj3MgqqeOnuyp5xNCX32QMohWBI0BC1BR9ATDAoql7KnnE0J7RKkHIIlQUPQEnQEPcGgoHIpe8rZlNAuQcohWBI0BC1BR9ATDAoql7KnnE0J7RKkHIIlQUPQEnQEPcGgoHIpe8rZlNAuQcohWBI0BC1BR9ATDAoql7KnnE0J7RKkHIIlQUPQEnQEPcGgoHIpe8rZlNAuQcohWBI0BC1BR9ATDApKl0T3+DwuQfv4mkmXAJYEDUFL0BH0BIOCyqX8aQf6yAObAyuBGWAWmAPmgQXJlDv5swh0e6/Zt/SkGziEEpgBZoE5YB5YkEwZn38bD43Sa5YjBDambrjczxYCoZ5tpx6HQKjn26nHIVDWU2dP/ngDDeRrpi79FG8AGoKWoCPoCQYFlUv54w00kK+ZconiDUBD0BJ0BD3BoKByKX+8gQbyNVMuUbwBaAhago6gJxgUVC7ljzfQQL5myiWKNwANQUvQEfQEg4LKpfzxBhrI10y5RPEGoCFoCTqCnmBQULmUP95AA/maKZco3gA0BC1BR9ATDApKl2QD+SwuQQP5mkmXAJYEDUFL0BH0BIOCyqX88QZ6y9dMuQSfAyFoCFqCjqAnGBRULuWPOdBjHtgcWAnMALPAHDAPLEim3MmfRaArfM2+pSfdwCGUwAwwC8wB88CCZMr4/Nt46DtfsxwhsDF1w+VBthAI9Ww79TgEQj3fTj0OgbKeOnvyxxvoVl8zdemneAPQELQEHUFPMCioXMofb6Bffc2USxRvABqClqAj6AkGBZVL+eMN9K+vmXKJ4g1AQ9ASdAQ9waCgcil/vIEO9jVTLlG8AWgIWoKOoCcYFFQu5Y830MO+ZsolijcADUFL0BH0BIOC0iXZxT6LS9DFvmbSJYAlQUPQEnQEPcGgoHIpf7yBPvY1Uy5RvAFoCFqCjqAnGBRULuWPN9DQvmbKJfh8CEFD0BJ0BD3BoKByKX/Mgc72wObASmAGmAXmgHlgQTLlTv4sAn3ugc2BlcAMMAvMAfPAgmTKnfx77f4+Upw1v5g3vyibX5jmF7b5hWt+4ZtfhO0XannJJvlVl/GwMdm4zckmbU42bXEy2dj5m05WfLNv732zb/+GBz/4Zt8+/GbfPjrq2x/evrVYrMvz9fnjR9eL1ZuL+eLq6rZzsXw7imLrrQbvrBZP4+cgerN50YvfrUbKojczOGKL3szhyFmvP5v3+jRbrz8zOGJ7/ZnDEd/rzwKOnBWxzgkedaxDI7aIdWjkrDeYzfsFHvVgZnDE9gYzhyO+N5gFHDnrxzoDqtOPdWjE9mMdGvH9WIdGzvrD2XyAP9P+cGZwxPaHM4cjvj+cBRw5G8Q6Q6oziHVoxA5iHRrxg1iHRs4Go9l80xwnqTOaGRyxg9HM4YgfjGYBR86Gsc6I6gxjHRqxw1iHRvww1uHvGc/cCH+mw/Es4MjZaDKbjyZ0bKPJzOCIHU1mDkfOhuPZHOuUw/HM8BGMp7P5eErfM57ODI7Y8XTmcMSPp7OAI2ejWAd/CqNYBx0dxTo0cjY5mc0nY5ptcjIzOGInJzOHI35yMgs4cjY9mc2neEWanswMjtjpyczhiJ+ezAKOnE2L2XyK58G0mBkcsdNi5nDET4tZwJGz4qSYzYsTvCrGMcNjNo45HvNxLPDYWXESb0QneH7FMcNjNo45HvNxLPDYWVHd+A7c+apb34F7X3XzwzEfxwKPnRXxllUcuGfFmxaP2TjmeMzHscBjZ0W8qRU9/B2PY4bHbBxzPHZW9IazedE/sFsYzgyP2TjmeOysiDerYrOBT+/l1Zx4H4ljjsd8HAs8dlb0R7N5sXlwTVpvNDM8ZuOY4zEfxwKPxf7rsR5ez+JY1dWc6sUbGI/FHuSxHl7visF4VvXlxHrjWdWJE+uNZ1XvTaw3nlXdNqlevJXEFnZUL95MeCw28Iv18Cobx6q2eFhvMqsa0GC9yaxqOYP1JrOqyQzWm8yqtjJUL954Y3cGqhdvvTwWe1PEenjVjWNVxwesN51Vz1bGetNZ9TRlrDedVc9PxnrTWfXEZKoXb5DxqZxUL94ieSw+XXRWPfaT6sXbSnz6C9WbxuvulK/z03jdxbH4lJVZ9VlqrBevuzgWPyMaowJes+JY9clL2t/H+wqPxc9JzqpPNKKf8b454fNlEu+bOBYfGRr95HMi3vTZz/h8ougZ34vjjf/Az6EXr+XxtUXyJV7LeSy+rxnjGvvSG8bAxsmwGMyqP6ehesVgVv0BDdUrBrPqT2aoXjGYVX8kg+ur6uF1MI5V77Pj+qp6eB2MY9X713iexUha4O9RHKs+JYLnWYylOBY/IzqrPgmCflb1OGtXIRjHbByr/vAb/azqbV5L2A3ePn707K3lzWJ9efHdVefp8mYdnlQvQ6zff7Y47d4s58ubdxar28vlTfzGZ+dvLv7D+erNy5vbztXiafXqxLjbWW1evaj+vV4+q/417HbeWK7Xy+v6q7cW508Wq83rGZ2ny+W6/mI77+uL9dvPOs/Ony1Wr1/+xeK0O+12lqvLxc36fH25vDntPluu1qvzy3W1gneXq+9Xr4g8/v9QSwMEFAAAAAgAaZAcXYYbH593AAAAjAAAACMAAAB4bC93b3Jrc2hlZXRzL19yZWxzL3NoZWV0MS54bWwucmVsc03MQQ7CIBAAwK+QvQvowRhT2psPMPqADV1bIuwSlhj8vVfnATMto2TzoaZJOMDRejDEUdbEW4Dn43a4gNGOvGIWpgBfUljm6U4ZexLWPVU1o2TWAHvv9eqcxp0KqpVKPEp+SSvY1UrbXMX4xo3cyfuza/8HuPkHUEsDBBQAAAAIAGmQHF29tGXhpw0AAJwOAQANAAAAeGwvc3R5bGVzLnhtbO1dS4/jxhG+B8h/IGggiINo+H6NJTkzO0PAgBMY2Q1gwGsYHKk1YpYPhaTWkg0DPjiHIIfAgHOyDeQQIDkmCJCTf1F2/R8CknqQI3H4EMmukr2HHYpqVn9VXV1dVd0sDd9euQ7zkgSh7XsjVrjgWYZ4E39qe/cj9nfPzIHOMmFkeVPL8T0yYtckZN8e//QnwzBaO+TpnJCIWbmOF47YeRQtLjkunMyJa4UX/oJ4K9eZ+YFrReGFH9xz4SIg1jSMH3IdTuR5lXMt22NTCpfupAoR1wpeLBeDie8urMi+sx07Wie0WMadXL5z7/mBdeeQEbsSZGvCrAQ1EJlVsO0kuXvQj2tPAj/0Z9HFxHc5fzazJ+QQrsEZnDXZU1IDsRklQeF4Mcf7KmhISeYC8tKOh48dD72la7pRyEz8pReNWG13i0n/vDMdsbLAMqk8n/hTMmI/GvyCeeOXb7zBfzR463nmOr7/sz8s/eitQfonuferjwYsd4SqoKl5sq6bPvX666/Si+fMdLq59e136UUBJa2EUsFjev6x9Tpt/eqPXzz6mJF/LGWfOd5Y5x/2sV5zrlvQWDhG+c23PvgtmX74/OfJx+dvxs9ym3EbD2e+tx8+SWOZRF0vX3j+x54ZfzdiBTZtNh6GnzAvLWfECkJMZOI7fsBEc+KSuFEMyXJJ2uLVP758/e3nzP/+87dXX/01/mpmubazTr8Uk6fnVhCSaENQNOJ7iSJuKLi25wcJ1rTvPAK93+5OZFhqAQG/RxDc341Y0+STf/Rg9CuIOw6MMHJQIGpGKo6eYYCzCX/58+uvP6/MaSlTtjclKzJtYHuaCZHmLD+V7bYmlwjC2qggUAhUp3kOinwgkL4VFIZiUFsMHzG6PMtEduzMDfgLUTYMTRPif5puSPSw0VyXaEwQKva6Xx4NEDNQ7gZFpRWp9QW6ju3vqNf++Szp0TRpSLadXqtPYIPq/KXsTnSJhI47VSeC71vV2mC8UbCW/IkzTrbj7DJOAh8nl2zHGQ8XVhSRwDNtx2E218/WCzJiPd8jKZ2kXUnr+8BaC6JS/YHQd+xpjOL+SZEfJciGYeiyJvOarIiqmIjwbtN+FyCpyWLEZTpqCmE3LvHIdNzXEXYfcNsXgF5kyvPXvEJBpkdc8e6ZvTFvr0ylL2XdGpE6fSV/wvHwzg+mJNiZBTXeSEjvjYcOmUXceBjY9/P4b+Qv4k78KPJdbjyc2ta971lO3MP2ieyTTLJvNGKjuR1vWBxGrVzcakO+vHHSLAFR3jbyF1ug5Y3Tdg35eSjqMpYeti/h6mHzMsYetj+Jt6Kx4sCNQu9axbWvLhx9LeDORXPpzUqOOmKuU9WArqUIlow2jBWHESsYo8mBMYWdiYTrntfux7VbUwbCrm6JuWRqL90duQPXvoUlrLQLaEt0KWCAPPYwjnUX3VJIAMeRGo8V/JweY4KGGjL1l3cOoeaYdbYot+gdWMvI32xZdeP6cYAwnOwpo0dawwuCl93oIDasLY+eo8rJC7ZwE7RNT/6Q+FH96gBOgVgfmO7D3lqZUY+x3R2kilDK1Lv/MesBOCSpdzkbm6IBOFEqIylbKZBg79LWtpauqDXHWhqFHu0aRV071Y6ggn7KwuMh4fERRxeVDUMk8h54BObOAIODdtL16Vrhm9gcVDPzqOfcYiqpVzwg7R59JkEPTzYvVjYw2bYdbLFkyQPhqU6ys9vtlK7PXHWY2+8Vx8mJ4l7QtrYrWEN96+729DUdT90FrLMHUZWnzUU4Hk6I4zyNKb0/252FNdjxcDXL1HlISkJ4u0vbcTaXKZn0w3hoOfa95xIviqutRPYkPpM/IV5E0kP5q1kxWb0bskKbcNOqImV4GWuxcNZxIYvMJ9tx9p+uk9b7z1dbHPtb7wV+RCZRUrCmCVQDDVJEQv1Rr4BD5bLGLDVtGasmas3sGrOatWCJiugLe/p50Qjd9Cf13J/cUX/qvj8x25/4sL9UDYWcGgoHWA7UMA9v7gf2J74XZQC2JyIRzpDQFINAAdamEFdNYL9ZunckMJO6V8eU6aRRE6uiyCv2Kb1v6opBkkIhiow97qfDrgy0IFcQdFzUjbwXkJm9ytiw1ga+Chy5mUHtHkyPstHwwaHQvUC5exHWaOTwUOi/sTj6cAIqoaaPUqrgZVaQLU2vsxIPEDBvypTW1Y/jbkjvWpNHX1nmVdDT1B4ZwzQFAZL5OLAWz8gqebopYh2SWLsN1JKsNzhUcf6ehRZqty0qmaaoBKMAlQJJ9wtR0jd8m6LbNXNKZdE6CDst9r7+MeE8sL0Xz3zTrmS4G7qtNJdwtVm41klgLyIRXy4jFqeAmkVY0L07KJsSnSXZGup++9ouQdb2ettgeZBt6YPSUW+VVksFzGpplINVt2BlAH5S0TZc7D9B1fHCrUMe2ipUydOrvTFDGS8c1zSXs4HvSefgVt7/hu6DFDLScOOpQ+3OLu1Sm/lJmvIXAfrk5bm0nINeaTBQOuixccceMlc+idRJxFk5xGmv95ydrj6CtHWx7rgWxVZlhrvvYz3lI4DVOvAF8eXhAMAA+YM6+EjjOFs2ga3gSz4o8DyR4+ZFzshZPFf7XjkgQpCdBTEAZQKvHFLAgUwhv5rzrs4nCqusxYAwA4wcW3IH4erM5keozyILkecF+7jUTUjA5aVRnou6/GsF3WjkL+DMztUyuKg85KzzXz478LKGewplWTkfYyzgi+kr5SGAH6HPOrqg5V5odyX8xglb3hO5Aa2ZCDo+g6nqf3PLA3JAil5VVh+dAQWswNAmqacNuQqnDRQUOTbx6DkwPJA1uJCLlngJ2qGwH1wNjJ5Hv6TcQCcHhYukcjBfYOgX4GkMVL/aKmjQ6xGZOLvR75KsIbFiRZAVfJCRHNTOawaPDzNgb63yWxEwYKkUYEnCuaQT8ymic+KlD1ZOrK0FFWOtvL8INGtSbYuj7ukRkKx2VEOum1d+ZXxRqlh0ErHQ8ThNRBmnQc8lHyhGWrXqmRRzYKDnQMfCgVbAgcxj4aCopLDcRW2Q3y/DyJ6tcYHuWtAqQswaRuXQEAq61+pUja03ejkrPEKFViSEghYxClrGNwsVBaHlACznwhJqOkaFBrysFGIuCWvAHLjFXRuidjUiuqVC+Canbzp+p4zHt4ebxQyt9mIufXhiyRi66Ku/vg8RfVb20unwUbz2CZ0RoLsbVawh4Fx0DU3/gakC1e18aEcQKtVeUwHVist6rNLZeKzx0ZTSg1501s/jWm3UAEnVDDb8fSIYJyYBn/5BeIi4CmTgr5QBPacqYSzBUw4a9ZGVFt4Gx1EXBEdpRcrvZbdbb4rKCazOCmX0bHfaffufylB0VhcHR5USzIUIYLhcKuBXHgqjYMoH2wvd14bHM/vJuBZKU0VWIB1dTqFw7kGLKrO2Tjtrnzz7Pkirv1QJpWLF4wVDgI2GXCH1ucvXSg94qL+hUKu7osE/tfClWrUkDXito1Zbp+EPGJ5RwkzBBxnH66rYk7/xDxhjwxy/tIMOM0J1jusqQcUMtJBGESwdJqzYu4UYIAM+s1YEWUdokxCuV/G7b+gw68j9AuBbrJX8BKQ8xJkW7DwcrjLwMWtnJnakPOjAWchtrDXWJZCZm0qslesYXt50pKzpTaJ+vLwcZgPw8pJb7bHzckbjwp8PK4J6Rrxo58OLJJ7RuOgoeKlSFBpu5IKxjnUR5rLqy0AyzSWqAREkjwHlkeEHGRGgLxcYLzLHz3bRPz9ZCaaEAyaoV5Xi1RjbOYZCzFhq9EEUei0GgL63FIcvW1wyELk2FeVhFgYILhkoLqB1yg9DaiC4gB6GOAwPgdgQwOddCjED3sM/rxKCGKvxaQgxIyxM20kdz64xiwh1A7DdOKeKmBhtHeQqnoUV5ymml1viQEbPgYKeAxU9B/h//QJLXqrYfiL0B2SE/gDkH14oxCwgxKwjxGwg9BV5hJgR6jOAeI2bEMd5fxaOh/HF02jtkJCZ+Mu4D4PN3GU8yyUj9tW//v3qv1+8/uafW+Rx4mppO5HtJRzFhB8+8/pP333/5TfMB/yHmde4Mw+pjz/E7KQUu3XB5dKejthP+c2/Ac/zymB7lf7Hi+l3n5UR3pPWM6RFSVef3NzIg6vbW3MgK5I5MEzjZiDqoqlr6vWNeKuVkd6tYlqG8I1yrcmSoA7MW/F2IN/I4uDqihcHt7wpXKtX2q2kXR8l/P2X37z+++cZZclIjy9+YM+eWFVy8iOS2xDdGWGhKlGlnOjOSqpViaoZotxeecfD6Wq2U+FEOJF155C8avMsMyUza+lEz3Zfjtj99a/J1F664q7Ve/ZLP9q02l+/a9/PIyFVX9/xg3A8dIPlk81lcosJ7u9GrGnGUE1z13J7W7i+lSQpYSHzJLelRlbRu2GU/GWWgT1iP7291oybW1Mc6Py1PpAlogwM5fpmoMhPrm9uTIMX+SefsczKdbzwciXII3YeRYtLjgsnc+Ja4YVrTwI/9GfRxcR3OX82syeECxcBsabhnJDIdTiR5w3O4FzL9tjxcCXIl6FjT0iwEeFGJE/390Zs5kMqlIQlssphN0SVv1IEfmBKvDCQVUsf6KqkDExFEG9U+fpWMZUMdqUZdoHnBGEPXrmMbJc4trfVgO24Z++O2PjjI0zE/ycjwYXx10/j3sb/B1BLAwQUAAAACABpkBxdyrtG2KAGAADHIAAAEwAAAHhsL3RoZW1lL3RoZW1lMS54bWztWV+LI7kRfw/kOwi9e7ttd/vPsD2H3bZvb3dmd9nxbrjHcrfcrbVaMpI8M+ZYCHsEEgiBwCXkJZC3ewghBznIkZd8mIVbkk2+Q2jZY7ds+Xbnbva4IzN+GEn9q9JPVaVSId394LJg6JxIRQWPcP2OjxHhiUgpzyL8dDyqdTBSGngKTHAS4SVR+IPjn/7kLhzpnBQEXRaMqyOIcK71/MjzVJKTAtQdMSf8smBTIQvQ6o6QmZdKuKA8K5jX8P2WVwDlGHEoSIQfTac0Iei/v/j1m89/iY+vtA8ZKQjXqhxImDwrdRNLxGDTWb38p5YqZhKdA4vwBeWpuBiTS40RA6VjJiPsmz/sHd/1NkJMH5CtyI3M31puLZDOGkZOZpONYBCEQau30W8ATO/jhu1ha9ja6DMASBLC11xsne1GHKyxFdCq6dA9aA+adQtf0d/cw/fC8mfhDWjVDPbwo1G8tWEFtGqGe/iw3+0PbP0GtGq29vBtvzcI2hbegHJG+WwP7YetZny12g1kKtg9J7wbBqN2Yw3forxKdK3kuT4UawU8F3IkuDbOBU050ss5mUJCIhwDoxNJ0QnNco3RHLhQJMJ+wx/5Tb9hfoFpGY/CEYGK9GooUXtDJR+kEknnOsL358BxBfL1V1+9evnlq5d/f/Xpp69e/nU9977cPeBZVe7N57/9zx9/jv79tz+9+ex3bryq4l//5Vev//HPb1KvLVq//+L1l198/Yff/OvPnzngPQmTKnxMC6LQQ3KBnogCuGsCMpHXkxjnQC0JyEUBDuBQ5xbw4RKYC9cntgmfScpTF/DDxXOL61kuF5o6gA/ywgKeCsH6QjqX86Ccq7qcBc/ck8tFFfcE4Nw1d7zj4OFinpOCulTGObFoPmbANWSEE43Kb2JGiEPsY0otu57SRAolphp9TFEfqNMkYzrRbqF7tAAGSxfBcQ6WbU6fob5gLvUDcm4jgWfAXCoJs8z4ISw0FE7GULAq8gR07iJ5tpSJZXClJfCMMIGGKVHKJfNILi26D4BRt9tP2bKwkVLTmQt5AkJUkQMxi3Mo5k7OlOdV7EdqJgQD9FhoJwlh75CyLxgFftDdzyjR19vWT2mWuwOk/LKQri1BhL0fl2wKxKW8Jwsru/YkdUZHf5FZoX1CCIMLSAlBTz9y4cVcuEnfzwnP7hGXbe6DHatlnxNFkKlrHI6lygrZM5KJA3xOlzuJZwm8AHlI88OZHTLDiaTOVPqIJTMrlVJZblo3iUeqgHfS+jgHK6zKvnLH61Ly6+6xs6V8/i1kyLVlhIR3ts0YGHEHzBgoOnGl2zHYGWsrUm4nI7Zwyk3tTbt1g7dT7xSUv7X42Sl7wu+n7HlvBc/NlzqHUspugXMI9yMsawaw4I8Jz2+rmtuq5v+yqjm0l29rmdta5raW+d5qmW354lVveYyW4uCVz5QydqaXjJwoU/gowWg6ooyZjhHa3DDN85iZXevt4DIJpo2k0D+jOj/LYU4iXDczZGqtOlNoLlSEfXxQtym9FsWpSFej9frVpSYcKdDbcT/cjGvK9Wq01d7e3m3Um16mqgRK2euQqExmk2g6SLSb70bCrOxGWHQdLDr1b2LhVbzCKEdQXoiHwYoRUgkwkpZ+WslfeffGPX3ImPayG47ldYMb87RFohJuNolKGOaQkt3hG/Z1d+tSi17DSaPdeR++9vZzA+N2D11EuNUMfYwSmEd4ykBjlBTzNMKqzFTAMh7hRK8N/W0yy1wqPQCVr2Dm02r9BdVEIkaLCJfL3xiA8S23eqPt/3DJdf0fnuW8XSeT6ZQk+sDItnui9EqJ8+t3BJcdsdBEnuXpBZqwhXwCaYTDdr00YEqV3lgzpbIS3Fsr7qSr9Va0Hlu2WxTYPIf1iVJN5iu4aW/oVNZhmO6uyu6vFzPJRjdx6r5daCdpHjhAylPTnT/e3yFfYdV0swqdua7becsp8d0PhAq1jpta003t0NlxgwVBZbpNaB46I276NNiNWq9SV5re3qu2mDwniR6QKSyYVqvLsUstIb56j1xlAjN6lV0uNVpIGuFP/LAXxI0wrvmdcFgLmoFf64S9Zq0Xhs36MKz7g37jBT6+q/OiHq7mHkFB2XL9am/G917ui6tS+04iCk+YOtgzwublvt5wvdyPy+8Y0TTCn7Qao26z22/Vus3eqBYM+p1aN271a4NW3B6MBnHY6Y5eYHRuwEGvGQetYafWqsdxLWj5Jf1Ot9YOGo1e0O51hkHvxdrW5HKdPta2uDLo8f8AUEsBAhQAFAAAAAgAaZAcXb8QB60VAQAAGAMAABMAAAAAAAAAAAAAAIABAAAAAFtDb250ZW50X1R5cGVzXS54bWxQSwECFAAUAAAACABpkBxdmNrri7EAAAAnAQAACwAAAAAAAAAAAAAAgAFGAQAAX3JlbHMvLnJlbHNQSwECFAAUAAAACABpkBxdm8CALu0AAABEAQAADwAAAAAAAAAAAAAAgAEgAgAAeGwvd29ya2Jvb2sueG1sUEsBAhQAFAAAAAgAaZAcXUq4b0LUAAAAKwIAABoAAAAAAAAAAAAAAIABOgMAAHhsL19yZWxzL3dvcmtib29rLnhtbC5yZWxzUEsBAhQAFAAAAAgAaZAcXXS1l9AlIwAAuT4BABgAAAAAAAAAAAAAAIABRgQAAHhsL3dvcmtzaGVldHMvc2hlZXQxLnhtbFBLAQIUABQAAAAIAGmQHF2GGx+fdwAAAIwAAAAjAAAAAAAAAAAAAACAAaEnAAB4bC93b3Jrc2hlZXRzL19yZWxzL3NoZWV0MS54bWwucmVsc1BLAQIUABQAAAAIAGmQHF29tGXhpw0AAJwOAQANAAAAAAAAAAAAAACAAVkoAAB4bC9zdHlsZXMueG1sUEsBAhQAFAAAAAgAaZAcXcq7RtigBgAAxyAAABMAAAAAAAAAAAAAAIABKzYAAHhsL3RoZW1lL3RoZW1lMS54bWxQSwUGAAAAAAgACAASAgAA/DwAAAAA";
 
 /* =====================================================================
  * xlsxlite — 외부 라이브러리 없이 xlsx(=zip) 를 읽고 쓰는 최소 도구
@@ -279,14 +502,235 @@ const TEMPLATE_B64 = "UEsDBBQABgAIAAAAIQBBN4LPbgEAAAQFAAATAAgCW0NvbnRlbnRfVHlwZX
   root.XlsxLite = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
+
 /* =====================================================================
- * photoxlsx — '현장 작업사진' 양식(xlsx)에 값과 사진을 채워 넣는다.
+ * xlsxutil — 세 업무가 함께 쓰는 시트/그림 조작 도구
+ *   · 셀 값 쓰기          setCell()
+ *   · 사진을 '칸' 안에 배치  fitBox()   (비율 유지 · 자르지 않음 · 가운데)
+ *   · 그림 파트 만들기      makeDrawing()
+ * ===================================================================== */
+(function (root) {
+  'use strict';
+  const { enc, dec } = root.XlsxLite;
+
+  const EMU = 9525;              // 1px = 9525 EMU
+  const PX_PER_WIDTH = 9;        // 열 너비 1 = 9px (맑은 고딕 11 실측)
+  const PX_PER_PT = 4 / 3;       // 행 높이 1pt = 4/3 px
+
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+
+  /** 열 번호(0=A) → 문자 */
+  function colName(n) {
+    let s = '';
+    n = n + 1;
+    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = (n - 1 - r) / 26; }
+    return s;
+  }
+  /** 열 문자 → 번호(A=0) */
+  function colIndex(s) {
+    let n = 0;
+    for (const ch of s) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return n - 1;
+  }
+
+  /**
+   * 셀에 값을 넣는다. 양식에 이미 있는 칸이면 서식(s=)을 그대로 두고 값만 바꾸고,
+   * 없는 칸이면 같은 행 안에서 열 순서에 맞게 새로 끼워 넣는다.
+   */
+  function setCell(sheet, ref, value, isNumber) {
+    const m = /^([A-Z]+)(\d+)$/.exec(ref);
+    const col = colIndex(m[1]), rowNo = m[2];
+    const body = isNumber
+      ? `<v>${value}</v>`
+      : `<is><t xml:space="preserve">${esc(value)}</t></is>`;
+    const tAttr = isNumber ? '' : ' t="inlineStr"';
+
+    const cellRe = new RegExp(`<c r="${ref}"((?:(?!/>|>)[\\s\\S])*)(?:/>|>[\\s\\S]*?</c>)`);
+    const hit = cellRe.exec(sheet);
+    if (hit) {
+      const attrs = hit[1].replace(/ t="[^"]*"/, '');
+      return sheet.replace(cellRe, `<c r="${ref}"${attrs}${tAttr}>${body}</c>`);
+    }
+
+    // 행을 찾아 열 순서에 맞는 자리에 끼워 넣는다
+    const rowRe = new RegExp(`<row[^>]* r="${rowNo}"[^>]*>([\\s\\S]*?)</row>`);
+    const rh = rowRe.exec(sheet);
+    const cell = `<c r="${ref}"${tAttr}>${body}</c>`;
+    if (!rh) return sheet;                       // 행 자체가 없으면 건드리지 않는다
+    let cells = rh[1], done = false;
+    cells = cells.replace(/<c r="([A-Z]+)\d+"/g, (all, c) => {
+      if (!done && colIndex(c) > col) { done = true; return cell + all; }
+      return all;
+    });
+    if (!done) cells += cell;
+    return sheet.replace(rowRe, rh[0].replace(rh[1], cells));
+  }
+
+  /**
+   * 사진을 '칸'(병합된 셀 영역) 안에 비율 그대로, 자르지 않고, 가운데 넣는다.
+   * box = { col0, row0, colW:[px…], rowH:[px…] }
+   * 남는 자리는 그냥 빈 칸으로 둔다(흰 상자를 덧그리지 않는다).
+   */
+  function fitBox(box, imgW, imgH) {
+    const boxW = box.colW.reduce((a, b) => a + b, 0);
+    const boxH = box.rowH.reduce((a, b) => a + b, 0);
+    const s = Math.min(boxW / imgW, boxH / imgH);
+    const w = imgW * s, h = imgH * s;
+
+    let col = box.col0, offX = (boxW - w) / 2;
+    for (let i = 0; i < box.colW.length - 1 && offX >= box.colW[i]; i++) { offX -= box.colW[i]; col++; }
+    let row = box.row0, offY = (boxH - h) / 2;
+    for (let i = 0; i < box.rowH.length - 1 && offY >= box.rowH[i]; i++) { offY -= box.rowH[i]; row++; }
+
+    return {
+      col, row,
+      colOff: Math.round(offX * EMU), rowOff: Math.round(offY * EMU),
+      cx: Math.round(w * EMU), cy: Math.round(h * EMU),
+    };
+  }
+
+  /** 사진 한 장을 놓는 oneCellAnchor XML */
+  function picAnchor(fit, id, name, rid) {
+    return `<xdr:oneCellAnchor>` +
+      `<xdr:from><xdr:col>${fit.col}</xdr:col><xdr:colOff>${fit.colOff}</xdr:colOff>` +
+      `<xdr:row>${fit.row}</xdr:row><xdr:rowOff>${fit.rowOff}</xdr:rowOff></xdr:from>` +
+      `<xdr:ext cx="${fit.cx}" cy="${fit.cy}"/>` +
+      `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${id}" name="${esc(name)}"/><xdr:cNvPicPr/></xdr:nvPicPr>` +
+      `<xdr:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>` +
+      `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${fit.cx}" cy="${fit.cy}"/></a:xfrm>` +
+      `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>` +
+      `<xdr:clientData/></xdr:oneCellAnchor>`;
+  }
+
+  /**
+   * 사진을 셀 범위에 '꽉 차게' 놓는 twoCellAnchor.
+   * 시작·끝을 셀 모서리로 잡으면 엑셀이 알아서 그 크기에 정확히 맞춘다.
+   * (비율은 유지되지 않는다 — 칸에 딱 맞추는 것이 목적)
+   * a = { col, colOff, row, rowOff }  b = 같은 형식(끝점)
+   */
+  function picAnchorFill(a, b, id, name, rid) {
+    return `<xdr:twoCellAnchor>` +
+      `<xdr:from><xdr:col>${a.col}</xdr:col><xdr:colOff>${a.colOff || 0}</xdr:colOff>` +
+      `<xdr:row>${a.row}</xdr:row><xdr:rowOff>${a.rowOff || 0}</xdr:rowOff></xdr:from>` +
+      `<xdr:to><xdr:col>${b.col}</xdr:col><xdr:colOff>${b.colOff || 0}</xdr:colOff>` +
+      `<xdr:row>${b.row}</xdr:row><xdr:rowOff>${b.rowOff || 0}</xdr:rowOff></xdr:to>` +
+      `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${id}" name="${esc(name)}"/><xdr:cNvPicPr/></xdr:nvPicPr>` +
+      `<xdr:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>` +
+      `<xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>` +
+      `<xdr:clientData/></xdr:twoCellAnchor>`;
+  }
+
+  /**
+   * 파일을 열었을 때 항상 왼쪽 맨 위(A1)가 보이게 한다.
+   * 양식 원본에 '오른쪽으로 스크롤한 상태'가 저장돼 있어서 엉뚱한 열부터 보이는 것을 막는다.
+   * 확대 비율(zoomScale)은 양식에 맞춰 둔 값이라 건드리지 않는다.
+   */
+  const SELECTION_A1 = '<selection activeCell="A1" sqref="A1"/>';
+  function resetView(sheet) {
+    sheet = sheet.replace(/ topLeftCell="[^"]*"/g, '');
+    if (/<selection[^>]*\/>/.test(sheet)) {
+      return sheet.replace(/<selection[^>]*\/>/g, SELECTION_A1);
+    }
+    if (/<pane\b/.test(sheet)) return sheet;          // 틀 고정이 있으면 그대로 둔다
+    if (/<sheetView[^>]*\/>/.test(sheet)) {
+      return sheet.replace(/<sheetView([^>]*?)\/>/,
+        (m, a) => `<sheetView${a}>${SELECTION_A1}</sheetView>`);
+    }
+    return sheet.replace(/(<sheetView[^>]*>)/, `$1${SELECTION_A1}`);
+  }
+
+  /** 빨간 동그라미(양식에서 '양호 / 불량' 중 하나를 표시할 때 쓰는 도형) */
+  function ellipse(id, col, colOff, row, rowOff, cx, cy) {
+    return `<xdr:twoCellAnchor>` +
+      `<xdr:from><xdr:col>${col}</xdr:col><xdr:colOff>${colOff}</xdr:colOff>` +
+      `<xdr:row>${row}</xdr:row><xdr:rowOff>${rowOff}</xdr:rowOff></xdr:from>` +
+      `<xdr:to><xdr:col>${col}</xdr:col><xdr:colOff>${colOff + cx}</xdr:colOff>` +
+      `<xdr:row>${row}</xdr:row><xdr:rowOff>${rowOff + cy}</xdr:rowOff></xdr:to>` +
+      `<xdr:sp macro="" textlink=""><xdr:nvSpPr><xdr:cNvPr id="${id}" name="타원 ${id}"/><xdr:cNvSpPr/></xdr:nvSpPr>` +
+      `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+      `<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom><a:noFill/>` +
+      `<a:ln w="28575"><a:solidFill><a:srgbClr val="FF0000"/></a:solidFill></a:ln></xdr:spPr>` +
+      `<xdr:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/>` +
+      `<a:p><a:pPr algn="l"/><a:endParaRPr lang="ko-KR" altLang="en-US" sz="1100"/></a:p></xdr:txBody>` +
+      `</xdr:sp><xdr:clientData/></xdr:twoCellAnchor>`;
+  }
+
+  const DRAW_HEAD = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" ` +
+    `xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ` +
+    `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`;
+
+  /**
+   * 그림 파트(drawing1.xml)와 이미지 파일들을 zip 목록에 넣는다.
+   * 양식에 원래 있던 도형(안내문구 등)은 그대로 살린다.
+   * pics = [{ bytes, fit, name }]
+   */
+  function writeDrawing(files, sheet, pics, extraShapes) {
+    const shapes = [];
+    const old = files.get('xl/drawings/drawing1.xml');
+    if (old) {
+      const s = dec.decode(old);
+      const i = s.indexOf('>', s.indexOf('<xdr:wsDr')) + 1;
+      shapes.push(s.slice(i, s.lastIndexOf('</xdr:wsDr>')));
+    }
+
+    const rels = [];
+    pics.forEach((p, i) => {
+      const rid = 'rIdImg' + (i + 1);
+      const nm = p.name || ('사진 ' + (i + 1));
+      shapes.push(p.fill
+        ? picAnchorFill(p.fill.from, p.fill.to, 1000 + i, nm, rid)   // 칸에 꽉 채움
+        : picAnchor(p.fit, 1000 + i, nm, rid));                      // 비율 유지 + 가운데
+      rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/photo${i + 1}.jpeg"/>`);
+      files.set(`xl/media/photo${i + 1}.jpeg`, p.bytes);
+    });
+    if (extraShapes) shapes.push(extraShapes.join(''));
+
+    files.set('xl/drawings/drawing1.xml', enc.encode(DRAW_HEAD + shapes.join('') + '</xdr:wsDr>'));
+    files.set('xl/drawings/_rels/drawing1.xml.rels', enc.encode(
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      rels.join('') + `</Relationships>`));
+
+    // 시트 ↔ 그림 연결 (양식에 이미 연결돼 있으면 그대로 둔다)
+    if (!/<drawing /.test(sheet)) {
+      const key = 'xl/worksheets/_rels/sheet1.xml.rels';
+      let srels = files.has(key) ? dec.decode(files.get(key))
+        : `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`;
+      const rel = `<Relationship Id="rIdDraw" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>`;
+      srels = srels.includes('</Relationships>')
+        ? srels.replace('</Relationships>', rel + '</Relationships>')
+        : srels.replace('/>', '>' + rel + '</Relationships>');
+      files.set(key, enc.encode(srels));
+      sheet = sheet.replace('</worksheet>', '<drawing r:id="rIdDraw"/></worksheet>');
+    }
+
+    // 콘텐츠 형식 등록
+    let ct = dec.decode(files.get('[Content_Types].xml'));
+    if (!ct.includes('Extension="jpeg"'))
+      ct = ct.replace('<Default Extension="rels"', '<Default Extension="jpeg" ContentType="image/jpeg"/><Default Extension="rels"');
+    if (!ct.includes('drawings/drawing1.xml'))
+      ct = ct.replace('</Types>', '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+    files.set('[Content_Types].xml', enc.encode(ct));
+
+    return sheet;
+  }
+
+  root.XlsxUtil = { EMU, PX_PER_WIDTH, PX_PER_PT, esc, colName, colIndex, setCell, fitBox, ellipse, writeDrawing, picAnchorFill, resetView };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+
+/* =====================================================================
+ * photoxlsx — [지중표시기] '현장 작업사진' 양식에 값과 사진을 채워 넣는다.
  *  · 양식 파일의 서식(테두리·글꼴·열너비·인쇄설정)은 그대로 보존
  *  · 사진 수만큼 '작업사진' 열이 오른쪽으로 늘어난다
  * ===================================================================== */
 (function (root) {
   'use strict';
   const { unzip, zip, enc, dec } = root.XlsxLite;
+  const U = root.XlsxUtil;
 
   const EMU = 9525;                 // 1px = 9525 EMU
   // 사진칸 실측 크기 (열너비 20.125 · 행높이 118.5pt · 기본글꼴 맑은 고딕 11)
@@ -301,81 +745,64 @@ const TEMPLATE_B64 = "UEsDBBQABgAIAAAAIQBBN4LPbgEAAAQFAAATAAgCW0NvbnRlbnRfVHlwZX
   /** 열 번호(1=A) → 문자 */
   function colName(n) {
     let s = '';
-    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = (n - r - 1) / 26; }
+    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = (n - 1 - r) / 26; }
     return s;
   }
 
   /**
-   * @param {ArrayBuffer} templateBuf  양식 xlsx
-   * @param {Object} data { partner, mgmtNo, qty, photos:[{bytes:Uint8Array, w, h}] }
-   * @returns {Promise<Uint8Array>} 완성된 xlsx
+   * @param templateBuf 양식 xlsx (ArrayBuffer)
+   * @param data { partner, mgmtNo, qty, photos:[{bytes,w,h}] }
    */
   async function build(templateBuf, data) {
     const files = await unzip(templateBuf);
+    let sheet = dec.decode(files.get('xl/worksheets/sheet1.xml'));
     const photos = data.photos || [];
-    const n = Math.max(photos.length, 1);          // 사진이 없어도 열 1개는 유지
-    const firstCol = 4;                            // D
+    const n = Math.max(1, photos.length);
+    const firstCol = 4;                       // D열
     const lastCol = firstCol + n - 1;
-    const edgeCol = lastCol + 1;                   // 표 오른쪽 가장자리(원본 E열 역할)
 
     /* ---------------- sheet1.xml ---------------- */
-    let sheet = dec.decode(files.get('xl/worksheets/sheet1.xml'));
 
     // 1) 열 너비 : D부터 마지막 사진 열까지 20.125
-    sheet = sheet.replace(
-      /<col min="4" max="4" width="20.125" style="6" customWidth="1"\/><col min="5" max="16384" width="9" style="4"\/>/,
-      `<col min="4" max="${lastCol}" width="20.125" style="6" customWidth="1"/>` +
-      `<col min="${lastCol + 1}" max="16384" width="9" style="4"/>`
-    );
+    sheet = sheet.replace(/<cols>[\s\S]*?<\/cols>/,
+      `<cols><col min="1" max="1" width="4.5" customWidth="1"/>` +
+      `<col min="2" max="2" width="14.5" customWidth="1"/>` +
+      `<col min="3" max="3" width="16.75" customWidth="1"/>` +
+      `<col min="${firstCol}" max="${lastCol}" width="20.125" customWidth="1"/></cols>`);
 
     // 2) 4~6행을 사진 개수에 맞춰 다시 구성 (스타일 번호는 양식 원본 값 그대로 사용)
-    const photoCells = (row, styleId, valueFn) => {
-      let s = '';
-      for (let i = 0; i < n; i++) {
-        const ref = colName(firstCol + i) + row;
-        const v = valueFn ? valueFn(i) : '';
-        s += `<c r="${ref}" s="${styleId}">${v}</c>`;
-      }
-      return s;
-    };
-
-    const row4 =
-      `<row r="4" spans="1:12" ht="20.25" customHeight="1" x14ac:dyDescent="0.3">` +
-      `<c r="A4" s="7"/><c r="B4" s="2" t="s"><v>2</v></c><c r="C4" s="22" t="s"><v>3</v></c>` +
+    const rowRe = /<row r="4"[\s\S]*?<\/row>\s*<row r="5"[\s\S]*?<\/row>\s*<row r="6"[\s\S]*?<\/row>/;
+    let r4 = `<row r="4" ht="19.5" customHeight="1" spans="1:${lastCol}">` +
+      `<c r="B4" s="10" t="inlineStr"><is><t>SK관리번호</t></is></c>` +
+      `<c r="C4" s="11" t="inlineStr"><is><t>${esc(data.mgmtNo)}</t></is></c>`;
+    for (let i = 0; i < n; i++) {
       // 첫 칸에만 '작업사진' 글자(공유문자열 1번), 나머지는 병합용 빈 칸
-      Array.from({ length: n }, (_, i) =>
-        `<c r="${colName(firstCol + i)}4" s="22"${i === 0 ? ' t="s"><v>1</v></c>' : '/>'}`).join('') +
-      `<c r="${colName(edgeCol)}4" s="10"/></row>`;
+      r4 += i === 0
+        ? `<c r="${colName(firstCol)}4" s="12" t="inlineStr"><is><t>작업사진</t></is></c>`
+        : `<c r="${colName(firstCol + i)}4" s="12"/>`;
+    }
+    r4 += `</row>`;
 
-    const row5 =
-      `<row r="5" spans="1:12" s="5" customFormat="1" ht="33" x14ac:dyDescent="0.3">` +
-      `<c r="A5" s="8"/><c r="B5" s="2" t="s"><v>5</v></c><c r="C5" s="3" t="s"><v>0</v></c>` +
-      photoCells(5, 2, i => `<v>${i + 1}</v>`) +
-      `<c r="${colName(edgeCol)}5" s="11"/></row>`;
+    let r5 = `<row r="5" ht="19.5" customHeight="1" spans="1:${lastCol}">` +
+      `<c r="B5" s="10" t="inlineStr"><is><t>작업수량(신설)</t></is></c>` +
+      `<c r="C5" s="11" t="inlineStr"><is><t>${esc(data.qty)}</t></is></c>`;
+    for (let i = 0; i < n; i++) r5 += `<c r="${colName(firstCol + i)}5" s="13"/>`;
+    r5 += `</row>`;
 
-    const mgmt = data.mgmtNo ? `<is><t xml:space="preserve">${esc(data.mgmtNo)}</t></is>` : '';
-    const qtyVal = (data.qty === '' || data.qty == null) ? '' :
-      (isFinite(data.qty) ? `<v>${Number(data.qty)}</v>` : `<is><t>${esc(data.qty)}</t></is>`);
-
-    const row6 =
-      `<row r="6" spans="1:12" s="6" customFormat="1" ht="118.5" customHeight="1" x14ac:dyDescent="0.3">` +
-      `<c r="A6" s="9"/>` +
-      `<c r="B6" s="1"${mgmt ? ' t="inlineStr">' + mgmt + '</c>' : '/>'}` +
-      `<c r="C6" s="1"${qtyVal ? (qtyVal.startsWith('<is>') ? ' t="inlineStr">' : '>') + qtyVal + '</c>' : '/>'}` +
-      photoCells(6, 18) +
-      `<c r="${colName(edgeCol)}6" s="12"/></row>`;
+    let r6 = `<row r="6" ht="118.5" customHeight="1" spans="1:${lastCol}">` +
+      `<c r="B6" s="14"/><c r="C6" s="15"/>`;
+    for (let i = 0; i < n; i++) r6 += `<c r="${colName(firstCol + i)}6" s="16"/>`;
+    r6 += `</row>`;
 
     // 7행 : 사진칸의 아래쪽 테두리가 이어지도록 같은 수만큼 칸을 만든다
-    const row7 =
-      `<row r="7" spans="1:12" s="6" customFormat="1" x14ac:dyDescent="0.3">` +
-      `<c r="B7" s="15"/><c r="C7" s="15"/>` +
-      photoCells(7, 16) + `</row>`;
+    let r7 = `<row r="7" ht="6" customHeight="1" spans="1:${lastCol}">`;
+    for (let i = 0; i < n; i++) r7 += `<c r="${colName(firstCol + i)}7" s="17"/>`;
+    r7 += `</row>`;
 
-    sheet = sheet
-      .replace(/<row r="4"[\s\S]*?<\/row>/, row4)
-      .replace(/<row r="5"[\s\S]*?<\/row>/, row5)
-      .replace(/<row r="6"[\s\S]*?<\/row>/, row6)
-      .replace(/<row r="7"[\s\S]*?<\/row>/, row7);
+    sheet = sheet.replace(rowRe, r4 + r5 + r6);
+    sheet = sheet.replace(/<row r="7"[\s\S]*?<\/row>/, r7);
+    sheet = sheet.replace(/<mergeCells[\s\S]*?<\/mergeCells>/, '');
+    sheet = sheet.replace(/<dimension ref="[^"]*"\/>/, `<dimension ref="A1:${colName(lastCol)}7"/>`);
 
     // 3) '작업사진' 머리글 병합 (사진 2장 이상일 때)
     if (n > 1) {
@@ -443,7 +870,7 @@ const TEMPLATE_B64 = "UEsDBBQABgAIAAAAIQBBN4LPbgEAAAQFAAATAAgCW0NvbnRlbnRfVHlwZX
         `<c r="B2" s="5" t="inlineStr"><is><t xml:space="preserve">◇ 협력사 : ${esc(data.partner)}</t></is></c>`);
     }
 
-    files.set('xl/worksheets/sheet1.xml', enc.encode(sheet));
+    files.set('xl/worksheets/sheet1.xml', enc.encode(U.resetView(sheet)));
     return zip(files);
   }
 
@@ -452,31 +879,383 @@ const TEMPLATE_B64 = "UEsDBBQABgAIAAAAIQBBN4LPbgEAAAQFAAATAAgCW0NvbnRlbnRfVHlwZX
   root.PhotoXlsx = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
-/* ===================== 앱 로직 ===================== */
+
+/* =====================================================================
+ * manholexlsx — [IoT 맨홀] 'IOT 맨홀 시설 점검표' 양식을 채운다.
+ *   사진칸 6개는 양식에 고정되어 있고, 사진은 비율 그대로 칸 안에 들어간다.
+ * ===================================================================== */
+(function (root) {
+  'use strict';
+  const { unzip, zip, enc, dec } = root.XlsxLite;
+  const U = root.XlsxUtil;
+
+  /* 사진칸 실측값.
+     이 양식의 기본 글꼴은 Calibri 9pt 라서 열 너비 1단위 = 6px 이다.
+       B/D = 20.5  → 123px      C/E = 36.664 → 220px
+     따라서 사진칸(B+C) 가로는 343px. 세로는 12.75pt × 10행.
+     사진은 셀 모서리에 앵커를 걸어 엑셀이 직접 칸 크기에 맞추게 한다. */
+  const COL_PX = { 1: 123, 2: 220, 3: 123, 4: 220 };   // B, C, D, E
+
+  // 양식에 고정된 사진칸 6개 (row/col 은 0부터 세는 번호, 끝점은 '다음 칸의 시작')
+  const BOXES = [
+    { key: 'front_closed', label: '맨홀 전경 (맨홀 닫고)', col0: 1, row0: 14, row1: 24, max: 1 },  // B15:C24
+    { key: 'front_open',   label: '맨홀 전경 (맨홀 열고)', col0: 3, row0: 14, row1: 24, max: 1 },  // D15:E24
+    { key: 'before1',      label: '고장 원인 (조치 전) ①', col0: 1, row0: 25, row1: 35, max: 2, mark: true },  // B26:C35
+    { key: 'after1',       label: '고장 원인 (조치 후) ①', col0: 3, row0: 25, row1: 35, max: 2, mark: true },  // D26:E35
+    { key: 'before2',      label: '고장 원인 (조치 전) ②', col0: 1, row0: 35, row1: 45, max: 2, mark: true },  // B36:C45
+    { key: 'after2',       label: '고장 원인 (조치 후) ②', col0: 3, row0: 35, row1: 45, max: 2, mark: true },  // D36:E45
+  ];
+
+  // 현장 점검항목 6개 (엑셀 E7~E12 의 '양호 / 불량')
+  const CHECKS = [
+    '1. 자석', '2. 배터리', '3. 통신 불량( Lora )',
+    '4. 외관 이상유무( 맨홀파손, 침수, 침하 )', '5. 보드 불량', '6. 기타 (SYSTEM 등)',
+  ];
+  // 수리항목 · 고장원인 고르는 값
+  const REPAIRS = ['자석교체', '배터리 교체', '통신 재연결', '단말기교체(A/S)', '이물질 제거'];
+  const CAUSES  = ['자석 불량', '배터리 불량', '통신 불량', '단말기 불량', '이물질'];
+
+  // 양호/불량 동그라미 위치 (원본 양식에서 실측한 값)
+  const MARK = { col: 4, good: 638175, bad: 1000125, cx: 438150, cy: 190500, rowOff: 9525, row0: 6 };
+
+  /* 시트 이름 : 점검일(월일) + 아래 뒷부분  예) 0828.SKO 강남 */
+  const SHEET_SUFFIX = '.SKO 강남';
+  /** 'YYYY-MM-DD' → '0828.SKO 강남' */
+  function sheetNameOf(date) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date || ''));
+    return (m ? m[2] + m[3] : '') + SHEET_SUFFIX;
+  }
+  /** 통합 문서의 시트 이름을 바꾼다 (workbook.xml 과 문서 속성 양쪽) */
+  function renameSheet(files, name) {
+    const wb = dec.decode(files.get('xl/workbook.xml'));
+    const cur = /<sheet name="([^"]*)"/.exec(wb);
+    if (!cur || cur[1] === name) return;
+    files.set('xl/workbook.xml', enc.encode(
+      wb.replace(`<sheet name="${cur[1]}"`, `<sheet name="${U.esc(name)}"`)));
+    if (files.has('docProps/app.xml')) {
+      const ap = dec.decode(files.get('docProps/app.xml'));
+      files.set('docProps/app.xml', enc.encode(ap.split(cur[1]).join(U.esc(name))));
+    }
+  }
+
+  /** 사진칸을 사진 수(1장 또는 2장)로 나눈 앵커 목록 */
+  function anchorsOf(b, n) {
+    const top = { row: b.row0, rowOff: 0 }, bot = { row: b.row1, rowOff: 0 };
+    const left = { col: b.col0, colOff: 0 }, right = { col: b.col0 + 2, colOff: 0 };
+    if (n < 2) return [{ from: { ...left, ...top }, to: { ...right, ...bot } }];
+
+    // 좌·우 반반. 가운데가 어느 열 안에 떨어지는지 계산한다.
+    const w0 = COL_PX[b.col0], w1 = COL_PX[b.col0 + 1];
+    const half = (w0 + w1) / 2;
+    const mid = half <= w0
+      ? { col: b.col0, colOff: Math.round(half * U.EMU) }
+      : { col: b.col0 + 1, colOff: Math.round((half - w0) * U.EMU) };
+    return [
+      { from: { ...left, ...top }, to: { ...mid, ...bot } },
+      { from: { ...mid, ...top }, to: { ...right, ...bot } },
+    ];
+  }
+
+  /**
+   * @param data { tester, date, mgmtNo, repair, cause, action, note,
+   *               checks:['good'|'bad'…], photos:{key:[{bytes},…]} }
+   */
+  async function build(templateBuf, data) {
+    const files = await unzip(templateBuf);
+    let sheet = dec.decode(files.get('xl/worksheets/sheet1.xml'));
+
+    if (data.sheetDate) renameSheet(files, sheetNameOf(data.sheetDate));
+
+    sheet = U.setCell(sheet, 'C3', data.tester);
+    sheet = U.setCell(sheet, 'E3', data.date);
+    sheet = U.setCell(sheet, 'C4', data.mgmtNo);
+    sheet = U.setCell(sheet, 'E4', data.repair);
+    sheet = U.setCell(sheet, 'C46', data.cause);
+    sheet = U.setCell(sheet, 'E46', data.action);
+    sheet = U.setCell(sheet, 'B49', data.note);
+
+    // 양호/불량 동그라미
+    const shapes = [];
+    (data.checks || []).forEach((v, i) => {
+      if (v !== 'good' && v !== 'bad') return;
+      shapes.push(U.ellipse(500 + i, MARK.col, v === 'good' ? MARK.good : MARK.bad,
+        MARK.row0 + i, MARK.rowOff, MARK.cx, MARK.cy));
+    });
+
+    // 사진 — 칸에 꽉 차게 (2장이면 좌·우 반반)
+    const pics = [];
+    for (const b of BOXES) {
+      const list = ((data.photos && data.photos[b.key]) || []).filter(Boolean).slice(0, b.max);
+      if (!list.length) continue;
+      const anch = anchorsOf(b, list.length);
+      list.forEach((p, i) => {
+        pics.push({ bytes: p.bytes, name: `${b.label}${list.length > 1 ? ' ' + (i + 1) : ''}`, fill: anch[i] });
+      });
+    }
+
+    sheet = U.writeDrawing(files, sheet, pics, shapes);
+    files.set('xl/worksheets/sheet1.xml', enc.encode(U.resetView(sheet)));
+    return zip(files);
+  }
+
+  root.ManholeXlsx = { build, BOXES, CHECKS, REPAIRS, CAUSES, sheetNameOf, SHEET_SUFFIX };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+
+/* =====================================================================
+ * auditxlsx — [국사 수검] '정산요청 세부' 양식을 채운다.
+ *   국사 1곳 = 가로 블록 하나. 국사가 늘면 블록을 오른쪽으로 붙인다.
+ *   블록 폭은 그 국사의 '점검 맨홀 수'(4~6)에 따라 늘어난다.
+ *   지역(수도권/동부/서부/중부)마다 세로 구간이 따로 있다.
+ * ===================================================================== */
+(function (root) {
+  'use strict';
+  const { unzip, zip, enc, dec } = root.XlsxLite;
+  const U = root.XlsxUtil;
+
+  const MANHOLE_MIN = 4, MANHOLE_MAX = 6;   // 국사 1곳당 점검 맨홀 수
+  const MAX_SITES = 18;                     // 한 지역에 넣을 수 있는 국사 수
+  const UNIT_CELL = 'D1';                   // 국사 1곳당 정산 단가가 있는 칸
+
+  const COL_A_W = 9, PHOTO_W = 20.625, GAP_W = 4.625;   // 열 너비
+
+  const REGIONS = [
+    { key: '수도권', base: 10, sumRow: 3 },
+    { key: '동부',   base: 66, sumRow: 4 },
+    { key: '서부',   base: 122, sumRow: 5 },
+    { key: '중부',   base: 178, sumRow: 6 },
+  ];
+  // 세로 5개 구간 (제목행 = base + 1 + 11*s)
+  const SECTIONS = [
+    { title: null, fixed: ['점검 국사 전경', '점검 국사 명판', 'SKT유선 Infra 확인(스캔본)'] },
+    { title: '2. 점검 맨홀_시건장치' },
+    { title: '3. 사다리 및 맨홀_침수여부(양수)' },
+    { title: '4. 함체 및 케이블 정리 상태' },
+    { title: '5. 관구/내관 및 케이블 마감' },
+  ];
+  const MAX_PER_SLOT = 2;                   // 사진칸 하나에 최대 2장 (좌·우 반반)
+
+  /** 구간 s 의 사진칸 개수 (0번 구간은 전경·명판·스캔본 3칸 고정) */
+  const slotsOf = (s, manholes) => (s === 0 ? 3 : manholes);
+  /** 사진칸 기본 이름 */
+  const labelOf = (s, j) => (s === 0 ? SECTIONS[0].fixed[j] : `점검 맨홀 #${j + 1}`);
+  /** 양식(블록 1개)에서 어느 칸의 서식을 베껴 올지 — 맨 끝 칸은 오른쪽 테두리를 살린다 */
+  const srcSlot = (j, slots) => (slots <= 4 ? j : (j === slots - 1 ? 3 : Math.min(j, 2)));
+
+  const rowInfo = (r) => {
+    for (const g of REGIONS) {
+      if (r < g.base || r >= g.base + 56) continue;
+      const off = r - g.base;
+      if (off === 0) return { g, header: true };          // '가. 수도권 정산 대상'
+      return { g, sec: Math.floor((off - 1) / 11), idx: (off - 1) % 11 };
+    }
+    return null;
+  };
+
+  /* ---------------- 시트 다시 짜기 ---------------- */
+
+  /**
+   * 양식의 블록 1개(B~I)를 본떠서, 국사 수·맨홀 수에 맞게 행과 병합을 새로 만든다.
+   * blocks = [{ start, manholes }]   start 는 0부터 세는 열 번호
+   */
+  function layout(sheet, blocks) {
+    const cellRe = /<c r="([A-Z]+)(\d+)"((?:(?!\/>|>)[\s\S])*)(?:\/>|>([\s\S]*?)<\/c>)/g;
+    const merges = [];
+
+    sheet = sheet.replace(/<row([^>]*)>([\s\S]*?)<\/row>/g, (all, attrs, body) => {
+      const rn = +(/ r="(\d+)"/.exec(attrs) || [])[1];
+      const info = rowInfo(rn);
+      if (!info || info.header) return all;
+
+      // 이 행의 원본 칸을 열 번호로 모아 둔다 (A열은 그대로 둔다)
+      const src = new Map();
+      let keepA = '';
+      let m;
+      cellRe.lastIndex = 0;
+      while ((m = cellRe.exec(body))) {
+        const ci = U.colIndex(m[1]);
+        if (ci === 0) { keepA = m[0]; continue; }
+        if (ci >= 1 && ci <= 8) src.set(ci, { attrs: m[3], inner: m[4] });
+      }
+      const put = (from, to, rowNo) => {
+        const s = src.get(from);
+        if (!s) return '';
+        const ref = U.colName(to) + rowNo;
+        return s.inner === undefined
+          ? `<c r="${ref}"${s.attrs}/>`
+          : `<c r="${ref}"${s.attrs}>${s.inner}</c>`;
+      };
+
+      let out = keepA;
+      for (const b of blocks) {
+        const slots = slotsOf(info.sec, b.manholes);
+        for (let j = 0; j < slots; j++) {
+          const ss = srcSlot(j, slots);
+          out += put(1 + 2 * ss, b.start + 2 * j, rn);
+          out += put(2 + 2 * ss, b.start + 2 * j + 1, rn);
+          // 이름칸(구간 제목 아래 줄)과 사진칸은 2열씩 병합한다
+          if (info.idx === 1) {
+            merges.push(`${U.colName(b.start + 2 * j)}${rn}:${U.colName(b.start + 2 * j + 1)}${rn}`);
+          } else if (info.idx === 2) {
+            merges.push(`${U.colName(b.start + 2 * j)}${rn}:${U.colName(b.start + 2 * j + 1)}${rn + 7}`);
+          }
+        }
+      }
+      return `<row${attrs}>${out}</row>`;
+    });
+
+    sheet = sheet.replace(/<mergeCells count="\d+">[\s\S]*?<\/mergeCells>/,
+      `<mergeCells count="${merges.length}">` +
+      merges.map(r => `<mergeCell ref="${r}"/>`).join('') + `</mergeCells>`);
+    return sheet;
+  }
+
+  /** 블록 폭에 맞춰 열 너비를 다시 정의한다 */
+  function writeCols(sheet, blocks) {
+    let out = `<cols><col min="1" max="1" width="${COL_A_W}" style="46"/>`;
+    for (const b of blocks) {
+      const first = b.start + 1, last = b.start + b.manholes * 2;   // 1부터 세는 열 번호
+      out += `<col min="${first}" max="${last}" width="${PHOTO_W}" style="46" customWidth="1"/>`;
+      out += `<col min="${last + 1}" max="${last + 1}" width="${GAP_W}" style="46" customWidth="1"/>`;
+    }
+    out += `</cols>`;
+    return sheet.replace(/<cols>[\s\S]*?<\/cols>/, out);
+  }
+
+  /* ---------------- 사진 자리 ---------------- */
+
+  /** 사진칸 하나에 사진 n장(1~2)을 놓을 자리. 2장이면 좌·우 반반 (열이 같은 너비라 딱 나뉜다) */
+  function anchorsOf(col0, row0, n) {
+    const top = { row: row0, rowOff: 0 }, bot = { row: row0 + 8, rowOff: 0 };
+    if (n < 2) {
+      return [{ from: { col: col0, colOff: 0, ...top }, to: { col: col0 + 2, colOff: 0, ...bot } }];
+    }
+    return [
+      { from: { col: col0, colOff: 0, ...top },     to: { col: col0 + 1, colOff: 0, ...bot } },
+      { from: { col: col0 + 1, colOff: 0, ...top }, to: { col: col0 + 2, colOff: 0, ...bot } },
+    ];
+  }
+
+  /**
+   * @param data { ym:'2026-07', unit:(국사 1곳당 정산 단가),
+   *               sites:[{ region, name, manholes, photos:{ 's0_0':[{bytes,label},…] } }] }
+   */
+  async function build(templateBuf, data) {
+    const files = await unzip(templateBuf);
+    let sheet = dec.decode(files.get('xl/worksheets/sheet1.xml'));
+
+    // 지역별 국사 (등록 순서 유지)
+    const byRegion = {};
+    for (const g of REGIONS) byRegion[g.key] = [];
+    for (const s of data.sites) if (byRegion[s.region]) byRegion[s.region].push(s);
+
+    // 블록(국사 자리)마다 폭을 정한다 — 같은 자리의 지역들 중 가장 많은 맨홀 수를 따른다
+    const maxBlocks = Math.max(1, ...REGIONS.map(g => byRegion[g.key].length));
+    const blocks = [];
+    let col = 1;
+    for (let k = 0; k < maxBlocks; k++) {
+      let n = MANHOLE_MIN;
+      for (const g of REGIONS) {
+        const s = byRegion[g.key][k];
+        if (s) n = Math.max(n, Math.min(MANHOLE_MAX, s.manholes || MANHOLE_MIN));
+      }
+      blocks.push({ start: col, manholes: n });
+      col += n * 2 + 1;
+    }
+
+    sheet = writeCols(sheet, blocks);
+    sheet = layout(sheet, blocks);
+
+    // 맨 위 정산 요약
+    const m = /^(\d{4})-(\d{1,2})$/.exec(data.ym || '') || [];
+    const yy = m[1] ? m[1].slice(2) : '', mo = m[2] ? String(+m[2]) : '';
+    sheet = U.setCell(sheet, 'B1', `${yy}년 ${mo}월정산 대상`);
+    const unit = +data.unit > 0 ? +data.unit : 0;      // 단가는 화면에서 받아 온다
+    if (unit) sheet = U.setCell(sheet, UNIT_CELL, unit, true);
+    let totCnt = 0, totAmt = 0;
+    for (const g of REGIONS) {
+      const c = byRegion[g.key].length, amt = c * unit;
+      sheet = U.setCell(sheet, 'C' + g.sumRow, c, true);
+      if (unit) sheet = U.setCell(sheet, 'D' + g.sumRow, amt, true);
+      totCnt += c; totAmt += amt;
+    }
+    sheet = U.setCell(sheet, 'C7', totCnt, true);
+    if (unit) sheet = U.setCell(sheet, 'D7', totAmt, true);
+
+    // 국사별 제목 · 사진칸 이름 · 사진
+    const pics = [];
+    for (const g of REGIONS) {
+      byRegion[g.key].forEach((site, k) => {
+        const b = blocks[k];
+        SECTIONS.forEach((sec, s) => {
+          const titleRow = g.base + 1 + 11 * s;
+          if (s === 0) {
+            sheet = U.setCell(sheet, U.colName(b.start) + titleRow,
+              `${k + 1}. 점검 국사 전경_${site.name}`);
+          }
+          const slots = slotsOf(s, Math.min(MANHOLE_MAX, site.manholes || MANHOLE_MIN));
+          for (let j = 0; j < slots; j++) {
+            const key = `s${s}_${j}`;
+            const list = ((site.photos && site.photos[key]) || []).filter(Boolean).slice(0, MAX_PER_SLOT);
+            const label = (list[0] && list[0].label) || labelOf(s, j);
+            sheet = U.setCell(sheet, U.colName(b.start + 2 * j) + (titleRow + 1), label);
+            if (!list.length) continue;
+            const withBytes = list.filter(p => p.bytes);
+            const anch = anchorsOf(b.start + 2 * j, titleRow + 1, withBytes.length);
+            withBytes.forEach((p, i) => {
+              pics.push({ bytes: p.bytes, name: `${site.name} ${label}`, fill: anch[i] });
+            });
+          }
+        });
+      });
+    }
+
+    const lastCol = blocks[blocks.length - 1].start + blocks[blocks.length - 1].manholes * 2;
+    sheet = sheet.replace(/<dimension ref="[^"]*"\/>/,
+      `<dimension ref="A1:${U.colName(lastCol)}246"/>`);
+    sheet = U.writeDrawing(files, sheet, pics, null);
+    files.set('xl/worksheets/sheet1.xml', enc.encode(U.resetView(sheet)));
+    return zip(files);
+  }
+
+  root.AuditXlsx = {
+    build, REGIONS, SECTIONS, MAX_SITES, MAX_PER_SLOT,
+    MANHOLE_MIN, MANHOLE_MAX, slotsOf, labelOf, UNIT_CELL,
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+
+/* ===================== 공통 앱 도구 ===================== */
 'use strict';
 
 const MAX_SIDE = 1280;        // 사진 긴 변 최대 픽셀
-/* 내려받을 파일명 : SK관리번호 + 아래 뒷부분 (양식 파일명과 동일한 형태)
-   FILE_EXT 만 바꾸면 확장자를 바꿀 수 있다. 내용은 항상 엑셀(xlsx) 파일이다. */
-const FILE_EXT = '.xlw';        // 원래대로 돌리려면 '.xlsx' 로 변경
-const FILE_SUFFIX = '_지중 표시기 보강 작업_현장 작업사진' + FILE_EXT;
 const JPEG_Q = 0.8;
+/* 내려받을 파일 확장자. 휴대폰 브라우저가 확장자를 임의로 바꾸는 것을 막으려고
+   .xlw 를 쓴다. 내용은 항상 엑셀(xlsx) 파일이다. '.xlsx' 로 바꿔도 된다. */
+const FILE_EXT = '.xlw';
 
-/* 포털에서 넘겨준 사용자 아이디가 있으면 사용자별로 협력사를 기억한다 */
+/* 포털에서 넘겨준 사용자 아이디가 있으면 사용자별로 기본값을 기억한다 */
 const USER = new URLSearchParams(location.search).get('u') || 'local';
-const PARTNER_KEY = 'photoform.partner.' + USER;
-
-let state = { mgmtNo: '', qtyMode: 'auto', qtyManual: '', sortMode: 'time', photos: [] };
-let partner = localStorage.getItem(PARTNER_KEY) || '';
+const LS = k => 'photoform.' + k + '.' + USER;
+/* 사생활 보호 모드 등에서는 localStorage 를 건드리기만 해도 오류가 난다 */
+function lsGet(k) { try { return localStorage.getItem(LS(k)) || ''; } catch (e) { return ''; } }
+function lsSet(k, v) { try { localStorage.setItem(LS(k), v); } catch (e) { /* 무시 */ } }
 
 /* ---------------- IndexedDB (사진 임시 보관) ---------------- */
 const DB_NAME = 'photoform', STORE = 'state';
+/* 저장소를 못 여는 환경(사생활 보호 모드 등)에서 앱이 멈추지 않도록 시간 제한을 둔다 */
 function openDB() {
   return new Promise((res, rej) => {
-    const r = indexedDB.open(DB_NAME, 1);
+    let done = false;
+    const end = fn => (...a) => { if (done) return; done = true; clearTimeout(t); fn(...a); };
+    const ok = end(res), fail = end(rej);
+    const t = setTimeout(() => fail(new Error('저장소를 열 수 없습니다')), 4000);
+    let r;
+    try { r = indexedDB.open(DB_NAME, 1); } catch (e) { return fail(e); }
     r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => fail(r.error);
+    r.onblocked = () => fail(new Error('저장소가 잠겨 있습니다'));
   });
 }
 async function dbPut(key, val) {
@@ -495,64 +1274,52 @@ async function dbGet(key) {
     q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
   });
 }
+async function dbDel(key) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(key);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
 
 /* ---------------- 화면 표시 ---------------- */
 function show(type, text, ms) {
   const el = document.getElementById('msg');
   el.innerHTML = text ? `<div class="msg ${type}">${text}</div>` : '';
   if (ms) setTimeout(() => { el.innerHTML = ''; }, ms);
+  if (text) window.scrollTo(0, 0);
 }
 function setStatus(t) { document.getElementById('status').textContent = t; }
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-function renderPartner() {
-  const has = !!partner;
-  document.getElementById('partnerView').style.display = has ? 'block' : 'none';
-  document.getElementById('partnerEdit').style.display = has ? 'none' : 'block';
-  document.getElementById('partnerText').textContent = partner || '';
-  document.getElementById('partner').value = partner || '';
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return u8;
 }
-function savePartner() {
-  const v = document.getElementById('partner').value.trim();
-  if (!v) { show('err', '협력사를 입력하세요.', 2500); return; }
-  partner = v;
-  localStorage.setItem(PARTNER_KEY, v);
-  renderPartner();
-  show('ok', '협력사를 저장했습니다. 다음부터는 자동으로 들어갑니다.', 3000);
+function today() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
-function editPartner() {
-  document.getElementById('partnerView').style.display = 'none';
-  document.getElementById('partnerEdit').style.display = 'block';
-}
+function safeName(s) { return String(s || '').replace(/[\\/:*?"<>|]/g, '_').trim(); }
 
-function setQtyMode(m) {
-  state.qtyMode = m;
-  document.getElementById('qmAuto').className = m === 'auto' ? 'on' : '';
-  document.getElementById('qmManual').className = m === 'manual' ? 'on' : '';
-  document.getElementById('qtyAutoBox').style.display = m === 'auto' ? 'block' : 'none';
-  document.getElementById('qtyManualBox').style.display = m === 'manual' ? 'block' : 'none';
-  save();
+/** 만든 파일을 내려받는다 */
+function download(bytes, name) {
+  const blob = new Blob([bytes], {
+    type: FILE_EXT === '.xlsx'
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      : 'application/octet-stream',
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+  show('ok', `<b>${esc(name)}</b><br>저장했습니다. 휴대폰의 <b>다운로드</b> 폴더(아이폰은 “파일” 앱)에서 확인하세요.`, 9000);
 }
-
-function renderPhotos() {
-  const box = document.getElementById('photos');
-  document.getElementById('qtyAutoVal').textContent = state.photos.length;
-  if (!state.photos.length) {
-    box.innerHTML = '<div class="empty">아직 사진이 없습니다.<br>위 단추로 촬영하거나 앨범에서 골라주세요.</div>';
-    return;
-  }
-  box.innerHTML = '<div class="grid">' + state.photos.map((p, i) => `
-    <div class="ph">
-      <span class="no">${i + 1}</span>
-      <img src="${p.url}" alt="사진 ${i + 1}">
-      <div class="cap">${fmtTime(p.time) || '시각 정보 없음'}</div>
-      <div class="ops">
-        <button onclick="move(${i},-1)" ${i === 0 ? 'disabled' : ''}>←</button>
-        <button onclick="move(${i},1)" ${i === state.photos.length - 1 ? 'disabled' : ''}>→</button>
-        <button class="del" onclick="removePhoto(${i})">삭제</button>
-      </div>
-    </div>`).join('') + '</div>';
-}
-
 
 /* ---------------- 촬영 시각 읽기 (EXIF) ----------------
    앨범에서 여러 장을 고를 때 브라우저는 '누른 순서'를 알려주지 않고
@@ -588,7 +1355,7 @@ function parseExifDate(buf, base) {
   const g16 = o => dv.getUint16(o, le), g32 = o => dv.getUint32(o, le);
   if (g16(base + 2) !== 42) return null;
 
-  const readStr = (p, tag) => {
+  const readStr = (p) => {
     const cnt = g32(p + 4);
     const vo = cnt > 4 ? base + g32(p + 8) : p + 8;
     let s = '';
@@ -602,7 +1369,7 @@ function parseExifDate(buf, base) {
     for (let i = 0; i < n && p + 12 <= buf.length; i++, p += 12) {
       const tag = g16(p);
       if (tag === 0x8769) sub = base + g32(p + 8);       // Exif SubIFD
-      if (tag === want) val = readStr(p, tag);
+      if (tag === want) val = readStr(p);
     }
     return { sub, val };
   };
@@ -621,25 +1388,6 @@ function parseExifDate(buf, base) {
 function natCmp(a, b) {
   return String(a).localeCompare(String(b), 'ko', { numeric: true, sensitivity: 'base' });
 }
-
-function sortPhotos() {
-  if (state.sortMode === 'time')      state.photos.sort((a, b) => (a.time || 0) - (b.time || 0));
-  else if (state.sortMode === 'name') state.photos.sort((a, b) => natCmp(a.name, b.name));
-  // 'pick' 은 고른 순서 그대로 두므로 정렬하지 않는다
-}
-
-function setSortMode(m) {
-  state.sortMode = m;
-  for (const k of ['time', 'name', 'pick'])
-    document.getElementById('sm_' + k).className = (k === m ? 'on' : '');
-  document.getElementById('sortHint').innerHTML = {
-    time: '사진에 기록된 <b>촬영 시각</b> 순으로 자동 정렬합니다. 현장에서 찍은 순서와 같습니다.',
-    name: '<b>파일 이름</b> 순으로 정렬합니다. (IMG_2 → IMG_10 순서로 올바르게 정렬)',
-    pick: '앨범에서 <b>넘어온 순서 그대로</b> 둡니다. 순서가 다르면 아래 ← → 로 옮기세요.',
-  }[m];
-  sortPhotos(); renderPhotos(); save();
-}
-
 function fmtTime(t) {
   if (!t) return '';
   const d = new Date(t), p = n => String(n).padStart(2, '0');
@@ -671,7 +1419,127 @@ async function shrink(file) {
   return { blob, w, h };
 }
 
-async function addFiles(input) {
+/** 한 장짜리 칸에 넣을 사진 하나를 고른다 */
+async function pickOne(input) {
+  const f = input.files && input.files[0];
+  input.value = '';
+  if (!f) return null;
+  const time = await readShotTime(f);
+  const { blob, w, h } = await shrink(f);
+  return { blob, w, h, time, name: f.name || '', url: URL.createObjectURL(blob) };
+}
+
+
+/* ===================== 화면 이동 ===================== */
+const SCREENS = {
+  home:    { el: 'scr-home',    title: '현장사진 정리',   sub: '할 일을 고르세요',            back: null,    act: null },
+  marker:  { el: 'scr-marker',  title: '지중표시기 보강', sub: '현장 작업사진 정리',          back: 'home',  act: ['엑셀 만들기', 'mkMakeExcel'], clear: 'mkResetAll' },
+  manhole: { el: 'scr-manhole', title: 'IoT 맨홀 점검',   sub: 'IOT 맨홀 시설 점검표',        back: 'home',  act: ['엑셀 만들기', 'mhMakeExcel'], clear: 'mhResetAll' },
+  audit:   { el: 'scr-audit',   title: '과기부 국사 수검', sub: '정산 월을 고르세요',          back: 'home',  act: null },
+  month:   { el: 'scr-month',   title: '국사 수검',       sub: '',                            back: 'audit', act: ['이 달 엑셀 만들기', 'auMakeExcel'] },
+  site:    { el: 'scr-site',    title: '국사 사진',       sub: '',                            back: 'month', act: ['목록으로', 'auBackToMonth'] },
+};
+let screen = 'home';
+
+function go(name) {
+  const s = SCREENS[name];
+  if (!s) return;
+  for (const k in SCREENS) document.getElementById(SCREENS[k].el).hidden = true;
+  document.getElementById(s.el).hidden = false;
+  screen = name;
+  document.getElementById('barTitle').textContent = s.title;
+  document.getElementById('barSub').textContent = s.sub;
+  document.getElementById('backBtn').style.display = s.back ? '' : 'none';
+  document.getElementById('clearBtn').style.display = s.clear ? '' : 'none';
+  const btn = document.getElementById('actBtn');
+  btn.style.display = s.act ? '' : 'none';
+  if (s.act) btn.textContent = s.act[0];
+  show('', '');
+  window.scrollTo(0, 0);
+  if (name === 'audit') auRenderMonths();
+  if (name === 'month') auRenderMonth();
+  if (name === 'site') auRenderSite();
+  if (name === 'manhole') mhRender();
+}
+function back() { const s = SCREENS[screen]; if (s.back) go(s.back); }
+function footAction() { const s = SCREENS[screen]; if (s.act) window[s.act[1]](); }
+function clearCurrent() { const s = SCREENS[screen]; if (s.clear) window[s.clear](); }
+
+
+/* =====================================================================
+ * 업무 1 — 지중표시기 보강
+ * ===================================================================== */
+const FILE_SUFFIX = '_지중 표시기 보강 작업_현장 작업사진' + FILE_EXT;
+let mkState = { mgmtNo: '', qtyMode: 'auto', qtyManual: '', sortMode: 'time', photos: [] };
+let partner = lsGet('partner');
+
+function renderPartner() {
+  const has = !!partner;
+  document.getElementById('partnerView').style.display = has ? 'block' : 'none';
+  document.getElementById('partnerEdit').style.display = has ? 'none' : 'block';
+  document.getElementById('partnerText').textContent = partner || '';
+  document.getElementById('partner').value = partner || '';
+}
+function savePartner() {
+  const v = document.getElementById('partner').value.trim();
+  if (!v) { show('err', '협력사를 입력하세요.', 2500); return; }
+  partner = v;
+  lsSet('partner', v);
+  renderPartner();
+  show('ok', '협력사를 저장했습니다. 다음부터는 자동으로 들어갑니다.', 3000);
+}
+function editPartner() {
+  document.getElementById('partnerView').style.display = 'none';
+  document.getElementById('partnerEdit').style.display = 'block';
+}
+
+function setQtyMode(m) {
+  mkState.qtyMode = m;
+  document.getElementById('qmAuto').className = m === 'auto' ? 'on' : '';
+  document.getElementById('qmManual').className = m === 'manual' ? 'on' : '';
+  document.getElementById('qtyAutoBox').style.display = m === 'auto' ? 'block' : 'none';
+  document.getElementById('qtyManualBox').style.display = m === 'manual' ? 'block' : 'none';
+  mkSave();
+}
+
+function mkRenderPhotos() {
+  const box = document.getElementById('photos');
+  document.getElementById('qtyAutoVal').textContent = mkState.photos.length;
+  if (!mkState.photos.length) {
+    box.innerHTML = '<div class="empty">아직 사진이 없습니다.<br>위 단추로 촬영하거나 앨범에서 골라주세요.</div>';
+    return;
+  }
+  box.innerHTML = '<div class="grid">' + mkState.photos.map((p, i) => `
+    <div class="ph">
+      <span class="no">${i + 1}</span>
+      <img src="${p.url}" alt="사진 ${i + 1}">
+      <div class="cap">${fmtTime(p.time) || '시각 정보 없음'}</div>
+      <div class="ops">
+        <button onclick="mkMove(${i},-1)" ${i === 0 ? 'disabled' : ''}>←</button>
+        <button onclick="mkMove(${i},1)" ${i === mkState.photos.length - 1 ? 'disabled' : ''}>→</button>
+        <button class="del" onclick="mkRemove(${i})">삭제</button>
+      </div>
+    </div>`).join('') + '</div>';
+}
+
+function mkSortPhotos() {
+  if (mkState.sortMode === 'time')      mkState.photos.sort((a, b) => (a.time || 0) - (b.time || 0));
+  else if (mkState.sortMode === 'name') mkState.photos.sort((a, b) => natCmp(a.name, b.name));
+  // 'pick' 은 고른 순서 그대로 두므로 정렬하지 않는다
+}
+function setSortMode(m) {
+  mkState.sortMode = m;
+  for (const k of ['time', 'name', 'pick'])
+    document.getElementById('sm_' + k).className = (k === m ? 'on' : '');
+  document.getElementById('sortHint').innerHTML = {
+    time: '사진에 기록된 <b>촬영 시각</b> 순으로 자동 정렬합니다. 현장에서 찍은 순서와 같습니다.',
+    name: '<b>파일 이름</b> 순으로 정렬합니다. (IMG_2 → IMG_10 순서로 올바르게 정렬)',
+    pick: '앨범에서 <b>넘어온 순서 그대로</b> 둡니다. 순서가 다르면 아래 ← → 로 옮기세요.',
+  }[m];
+  mkSortPhotos(); mkRenderPhotos(); mkSave();
+}
+
+async function mkAddFiles(input) {
   const files = [...input.files];
   input.value = '';
   if (!files.length) return;
@@ -681,90 +1549,75 @@ async function addFiles(input) {
     try {
       const time = await readShotTime(f);
       const { blob, w, h } = await shrink(f);
-      state.photos.push({ blob, w, h, time, name: f.name || '', url: URL.createObjectURL(blob) });
+      mkState.photos.push({ blob, w, h, time, name: f.name || '', url: URL.createObjectURL(blob) });
       ok++;
       setStatus(`사진 처리 중… ${ok}/${files.length}`);
     } catch (e) {
-      show('err', `사진 하나를 읽지 못했습니다 (${f.name}).`, 4000);
+      show('err', `사진 하나를 읽지 못했습니다 (${esc(f.name)}).`, 4000);
     }
   }
-  sortPhotos();
-  renderPhotos();
-  await save();
-  const 미상 = state.photos.filter(p => !p.time).length;
-  if (state.sortMode === 'time' && 미상)
+  mkSortPhotos();
+  mkRenderPhotos();
+  await mkSave();
+  const 미상 = mkState.photos.filter(p => !p.time).length;
+  if (mkState.sortMode === 'time' && 미상)
     show('warn', `사진 ${미상}장은 촬영 시각 정보가 없어 순서가 맞지 않을 수 있습니다. 아래에서 확인해 주세요.`, 7000);
   else if (ok > 1)
     show('ok', `사진 ${ok}장을 추가했습니다.`, 2500);
-  setStatus(`사진 ${state.photos.length}장 · 자동 저장됨`);
+  setStatus(`사진 ${mkState.photos.length}장 · 자동 저장됨`);
 }
 
-function move(i, d) {
+function mkMove(i, d) {
   const j = i + d;
-  if (j < 0 || j >= state.photos.length) return;
-  const t = state.photos[i]; state.photos[i] = state.photos[j]; state.photos[j] = t;
-  renderPhotos(); save();
+  if (j < 0 || j >= mkState.photos.length) return;
+  const t = mkState.photos[i]; mkState.photos[i] = mkState.photos[j]; mkState.photos[j] = t;
+  mkRenderPhotos(); mkSave();
 }
-function removePhoto(i) {
+function mkRemove(i) {
   if (!confirm(`${i + 1}번 사진을 삭제할까요?`)) return;
-  URL.revokeObjectURL(state.photos[i].url);
-  state.photos.splice(i, 1);
-  renderPhotos(); save();
+  URL.revokeObjectURL(mkState.photos[i].url);
+  mkState.photos.splice(i, 1);
+  mkRenderPhotos(); mkSave();
 }
-async function resetAll() {
+async function mkResetAll() {
   if (!confirm('사진과 입력값을 모두 지웁니다. 진행할까요?')) return;
-  state.photos.forEach(p => URL.revokeObjectURL(p.url));
-  state = { mgmtNo: '', qtyMode: 'auto', qtyManual: '', sortMode: state.sortMode, photos: [] };
+  mkState.photos.forEach(p => URL.revokeObjectURL(p.url));
+  mkState = { mgmtNo: '', qtyMode: 'auto', qtyManual: '', sortMode: mkState.sortMode, photos: [] };
   document.getElementById('mgmtNo').value = '';
   document.getElementById('qtyManual').value = '';
   setQtyMode('auto');
-  renderPhotos();
-  await save();
+  mkRenderPhotos();
+  await mkSave();
   show('ok', '모두 지웠습니다.', 2500);
 }
 
-/* ---------------- 저장 / 복원 ---------------- */
-function touch() { clearTimeout(touch._t); touch._t = setTimeout(save, 400); }
-async function save() {
-  state.mgmtNo = document.getElementById('mgmtNo').value;
-  state.qtyManual = document.getElementById('qtyManual').value;
+function mkTouch() { clearTimeout(mkTouch._t); mkTouch._t = setTimeout(mkSave, 400); }
+async function mkSave() {
+  mkState.mgmtNo = document.getElementById('mgmtNo').value;
+  mkState.qtyManual = document.getElementById('qtyManual').value;
   try {
     await dbPut('current', {
-      mgmtNo: state.mgmtNo, qtyMode: state.qtyMode, qtyManual: state.qtyManual, sortMode: state.sortMode,
-      photos: state.photos.map(p => ({ blob: p.blob, w: p.w, h: p.h, time: p.time, name: p.name })),
+      mgmtNo: mkState.mgmtNo, qtyMode: mkState.qtyMode, qtyManual: mkState.qtyManual, sortMode: mkState.sortMode,
+      photos: mkState.photos.map(p => ({ blob: p.blob, w: p.w, h: p.h, time: p.time, name: p.name })),
     });
-    setStatus(state.photos.length ? `사진 ${state.photos.length}장 · 자동 저장됨` : '자동 저장됨');
+    setStatus(mkState.photos.length ? `사진 ${mkState.photos.length}장 · 자동 저장됨` : '자동 저장됨');
   } catch (e) {
     setStatus('저장 실패 — 저장 공간을 확인하세요');
   }
 }
-async function restore() {
+async function mkRestore() {
   try {
     const s = await dbGet('current');
     if (!s) return;
-    state.mgmtNo = s.mgmtNo || '';
-    state.qtyMode = s.qtyMode || 'auto';
-    state.qtyManual = s.qtyManual || '';
-    state.sortMode = s.sortMode || 'time';
-    state.photos = (s.photos || []).map(p => ({ ...p, url: URL.createObjectURL(p.blob) }));
-    document.getElementById('mgmtNo').value = state.mgmtNo;
-    document.getElementById('qtyManual').value = state.qtyManual;
+    mkState.mgmtNo = s.mgmtNo || '';
+    mkState.qtyMode = s.qtyMode || 'auto';
+    mkState.qtyManual = s.qtyManual || '';
+    mkState.sortMode = s.sortMode || 'time';
+    mkState.photos = (s.photos || []).map(p => ({ ...p, url: URL.createObjectURL(p.blob) }));
+    document.getElementById('mgmtNo').value = mkState.mgmtNo;
+    document.getElementById('qtyManual').value = mkState.qtyManual;
   } catch (e) { /* 무시 */ }
 }
-
-/* ---------------- 엑셀 만들기 ---------------- */
-function b64ToBytes(b64) {
-  const bin = atob(b64);
-  const u8 = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-  return u8;
-}
-function today() {
-  const d = new Date();
-  const p = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
-}
-
 
 /* 사진을 사진칸 비율(가로:세로)로 가운데를 잘라낸다 — 셀에 여백 없이 꽉 차게 하기 위함 */
 async function cropToCell(blob) {
@@ -793,61 +1646,724 @@ async function cropToCell(blob) {
   return { bytes: new Uint8Array(await out.arrayBuffer()), w: OUT_W, h: OUT_H };
 }
 
-async function makeExcel() {
-  const btn = document.getElementById('makeBtn');
+async function mkMakeExcel() {
+  const btn = document.getElementById('actBtn');
   const mgmtNo = document.getElementById('mgmtNo').value.trim();
-  if (!partner) { show('err', '먼저 협력사를 지정하세요.', 3000); window.scrollTo(0, 0); return; }
+  if (!partner) { show('err', '먼저 협력사를 지정하세요.', 3000); return; }
   if (!mgmtNo) { show('err', 'SK관리번호를 입력하세요.', 3000); document.getElementById('mgmtNo').focus(); return; }
-  if (!state.photos.length && !confirm('사진이 없습니다. 그래도 만들까요?')) return;
+  if (!mkState.photos.length && !confirm('사진이 없습니다. 그래도 만들까요?')) return;
 
   btn.disabled = true; setStatus('엑셀 만드는 중…');
   try {
-    const qty = state.qtyMode === 'auto'
-      ? state.photos.length
+    const qty = mkState.qtyMode === 'auto'
+      ? mkState.photos.length
       : (document.getElementById('qtyManual').value.trim());
 
     const photos = [];
-    for (const p of state.photos) {
-      photos.push(await cropToCell(p.blob));
-    }
+    for (const p of mkState.photos) photos.push(await cropToCell(p.blob));
 
-    const tpl = b64ToBytes(TEMPLATE_B64);
+    const tpl = b64ToBytes(TPL_MARKER);
     const out = await PhotoXlsx.build(tpl.buffer, { partner, mgmtNo, qty, photos });
-
-    const blob = new Blob([out], {
-      type: FILE_EXT === '.xlsx'
-        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        : 'application/octet-stream',    // 확장자를 브라우저가 임의로 바꾸지 않도록
-    });
-    // 파일명 : 양식 파일명의 'template' 자리에 SK관리번호가 들어간다.
-    //   template_지중 표시기 보강 작업_현장 작업사진.xlsx
-    //   → GN-0142_지중 표시기 보강 작업_현장 작업사진.xlsx
-    const idPart = mgmtNo.replace(/[\\/:*?"<>|]/g, '_').trim() || 'NO';
-    const name = idPart + FILE_SUFFIX;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-
-    show('ok', `<b>${name}</b><br>저장했습니다. 휴대폰의 <b>다운로드</b> 폴더(아이폰은 “파일” 앱)에서 확인하세요.<br>`, 9000);
+    download(out, (safeName(mgmtNo) || 'NO') + FILE_SUFFIX);
   } catch (e) {
     console.error(e);
     show('err', '엑셀을 만들지 못했습니다.<br>' + (e && e.message ? e.message : ''), 8000);
   } finally {
     btn.disabled = false;
-    setStatus(state.photos.length ? `사진 ${state.photos.length}장 · 자동 저장됨` : '자동 저장됨');
+    setStatus(mkState.photos.length ? `사진 ${mkState.photos.length}장 · 자동 저장됨` : '자동 저장됨');
   }
 }
 
+
+/* =====================================================================
+ * 업무 2 — IoT 맨홀 점검
+ * ===================================================================== */
+const MH_EMPTY = () => ({
+  tester: '', date: today(), mgmtNo: '', note: '',
+  repairs: [], repairEtc: '',        // 목록에서 고른 것 + 직접 입력
+  causes: [], causeEtc: '',
+  checks: ['good', 'good', 'good', 'good', 'good', 'good'],   // 기본은 모두 양호
+  photos: {},                                                  // { key: [사진, …] }
+});
+let mhState = MH_EMPTY();
+
+const mhList = key => (mhState.photos[key] = mhState.photos[key] || []);
+/** 고른 값 + 직접 입력한 값을 쉼표로 이어 붙인다 */
+function mhJoin(sel, etc) {
+  const extra = String(etc || '').split(',').map(s => s.trim()).filter(Boolean);
+  return sel.concat(extra).join(', ');
+}
+const mhRepairText = () => mhJoin(mhState.repairs, mhState.repairEtc);
+const mhCauseText  = () => mhJoin(mhState.causes, mhState.causeEtc);
+
+/** 사진 미리보기 + 그 위의 빨간 동그라미
+    동그라미 반지름(r)은 '사진 가로폭' 기준이라 % 로 그대로 쓸 수 있다. */
+function mhPreview(p) {
+  const marks = (p.marks || []).map(m =>
+    `<span class="mk" style="left:${m.x * 100}%;top:${m.y * 100}%;width:${m.r * 200}%"></span>`).join('');
+  return `<span class="pvbox"><img src="${p.url}" alt="">${marks}</span>`;
+}
+
+function mhRender() {
+  const chips = (list, sel, fn) => list.map(v =>
+    `<button class="${sel.includes(v) ? 'on' : ''}" onclick="${fn}('${v}')">${esc(v)}</button>`).join('');
+  document.getElementById('mhRepairs').innerHTML = chips(ManholeXlsx.REPAIRS, mhState.repairs, 'mhToggleRepair');
+  document.getElementById('mhCauses').innerHTML  = chips(ManholeXlsx.CAUSES,  mhState.causes,  'mhToggleCause');
+  document.getElementById('mhActionView').textContent = mhRepairText();
+
+  document.getElementById('mhChecks').innerHTML = ManholeXlsx.CHECKS.map((c, i) => `
+    <label style="margin-top:${i ? 12 : 4}px">${esc(c)}</label>
+    <div class="seg tiny ${mhState.checks[i] === 'bad' ? 'bad' : ''}">
+      <button class="${mhState.checks[i] === 'good' ? 'on' : ''}" onclick="mhSetCheck(${i},'good')">양호</button>
+      <button class="${mhState.checks[i] === 'bad' ? 'on' : ''}" onclick="mhSetCheck(${i},'bad')">불량</button>
+    </div>`).join('');
+
+  document.getElementById('mhSlots').innerHTML = ManholeXlsx.BOXES.map(b => {
+    const list = mhList(b.key);
+    const photos = list.map((p, i) => {
+      const n = (p.marks || []).length;
+      return `
+      <div style="margin-top:${i ? 12 : 0}px">
+        ${b.mark ? `<span onclick="markOpen('${b.key}',${i})" style="cursor:pointer">${mhPreview(p)}</span>`
+                 : mhPreview(p)}
+        <div class="row" style="margin-top:7px">
+          ${b.mark ? `<button class="btn w sm" style="flex:1" onclick="markOpen('${b.key}',${i})">
+            🔴 표시하기${n ? ` (${n}개)` : ''}</button>` : ''}
+          <button class="btn r sm" style="flex:1" onclick="mhDelPhoto('${b.key}',${i})">삭제</button>
+        </div>
+      </div>`;
+    }).join('');
+    const canAdd = list.length < b.max;
+    const none = b.mark
+      ? '<div class="none">사진 없음<br><span style="font-size:11.5px">사진을 넣으면 빨간 동그라미를 표시할 수 있습니다</span></div>'
+      : '<div class="none">사진 없음</div>';
+    return `<div class="slot">
+      <div class="hd"><b>${esc(b.label)}</b>
+        <span class="tag">${list.length}/${b.max}장</span></div>
+      <div class="bd">
+        ${photos || none}
+        ${canAdd ? `<div class="row" style="margin-top:10px">
+          <button class="btn sm" style="flex:1" onclick="mhPick('${b.key}',true)">촬영</button>
+          <button class="btn w sm" style="flex:1" onclick="mhPick('${b.key}',false)">앨범</button>
+        </div>` : ''}
+      </div></div>`;
+  }).join('');
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  set('mhTester', mhState.tester); set('mhDate', mhState.date || today());
+  set('mhNo', mhState.mgmtNo); set('mhNote', mhState.note);
+  set('mhRepairEtc', mhState.repairEtc); set('mhCauseEtc', mhState.causeEtc);
+  mhShowSheetName();
+}
+/** 점검일에 맞춘 시트 이름을 화면에 보여 준다 */
+function mhShowSheetName() {
+  const el = document.getElementById('mhSheetName');
+  if (el) el.textContent = ManholeXlsx.sheetNameOf(
+    (document.getElementById('mhDate') || {}).value || mhState.date || today());
+}
+function mhDateChanged() { mhShowSheetName(); mhTouch(); }
+
+function mhToggle(arr, v) {
+  const i = arr.indexOf(v);
+  if (i < 0) arr.push(v); else arr.splice(i, 1);
+}
+/* 화면을 다시 그리면 입력칸이 상태값으로 덮어써진다.
+   그러니 다시 그리기 전에 '지금 입력칸에 쳐 둔 값'을 먼저 상태로 옮긴다. */
+function mhSyncInputs() {
+  if (!document.getElementById('mhTester')) return;
+  const v = id => (document.getElementById(id) || {}).value || '';
+  mhState.tester = v('mhTester'); mhState.date = v('mhDate');
+  mhState.mgmtNo = v('mhNo'); mhState.note = v('mhNote');
+  mhState.repairEtc = v('mhRepairEtc'); mhState.causeEtc = v('mhCauseEtc');
+}
+/** 입력칸 반영 → 값 바꾸기 → 다시 그리기 → 저장 */
+function mhUpdate(fn) { mhSyncInputs(); fn(); mhRender(); mhSave(); }
+
+function mhToggleRepair(v) { mhUpdate(() => mhToggle(mhState.repairs, v)); }
+function mhToggleCause(v)  { mhUpdate(() => mhToggle(mhState.causes, v)); }
+function mhSetCheck(i, v)  { mhUpdate(() => { mhState.checks[i] = v; }); }
+/* 직접 입력은 글자를 칠 때마다 화면을 다시 그리면 커서가 튀므로
+   상태와 '조치 이력' 표시만 갱신한다. */
+function mhEtc() {
+  mhSyncInputs();
+  document.getElementById('mhActionView').textContent = mhRepairText();
+  mhTouch();
+}
+
+function mhPick(key, useCam) {
+  const b = ManholeXlsx.BOXES.find(x => x.key === key);
+  if (mhList(key).length >= b.max) return;
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  if (useCam) inp.capture = 'environment';
+  inp.onchange = async () => {
+    setStatus('사진 처리 중…');
+    try {
+      const p = await pickOne(inp);
+      if (p) { mhSyncInputs(); p.marks = []; mhList(key).push(p); mhRender(); await mhSave(); }
+    } catch (e) { show('err', '사진을 읽지 못했습니다.', 4000); }
+    setStatus('자동 저장됨');
+  };
+  inp.click();
+}
+function mhDelPhoto(key, i) {
+  if (!confirm('이 사진을 지울까요?')) return;
+  mhSyncInputs();
+  const list = mhList(key);
+  URL.revokeObjectURL(list[i].url);
+  list.splice(i, 1);
+  mhRender(); mhSave();
+}
+async function mhResetAll() {
+  if (!confirm('맨홀 점검 입력값과 사진을 모두 지웁니다. 진행할까요?')) return;
+  for (const k in mhState.photos) mhState.photos[k].forEach(p => URL.revokeObjectURL(p.url));
+  const tester = mhState.tester;      // 점검자는 다음에도 그대로 쓴다
+  mhState = MH_EMPTY(); mhState.tester = tester;
+  mhRender(); await mhSave();
+  show('ok', '모두 지웠습니다.', 2500);
+}
+
+/* 다음에 '다시 열었을 때' 남겨 둘 항목 = '1 기본 정보' 뿐.
+   2 현장 점검항목 · 4 조치 내용은 맨홀마다 새로 쓰는 값이라 저장하지 않는다.
+   3 사진만은 저장해 둔다 — 실수로 새로고침했을 때 다시 찍지 않아도 되도록.
+   다만 앱을 새로 열면(탭을 닫았다 열면) 사진도 지운다. */
+const MH_KEEP = ['tester', 'date', 'mgmtNo', 'repairs', 'repairEtc'];
+const MH_SESSION = 'photoform.mhSession';
+
+/** 같은 탭에서 새로고침한 것인지(true), 앱을 새로 연 것인지(false) 구분한다 */
+function mhSameSession() {
+  try {
+    const had = sessionStorage.getItem(MH_SESSION);
+    sessionStorage.setItem(MH_SESSION, '1');
+    return !!had;
+  } catch (e) { return false; }        // sessionStorage 를 못 쓰면 '새로 연 것'으로 본다
+}
+
+function mhTouch() { clearTimeout(mhTouch._t); mhTouch._t = setTimeout(mhSave, 400); }
+async function mhSave() {
+  mhSyncInputs();
+  lsSet('tester', mhState.tester);
+  try {
+    const keep = {};
+    for (const k of MH_KEEP) keep[k] = mhState[k];
+    keep.photos = {};
+    for (const k in mhState.photos) {
+      keep.photos[k] = mhState.photos[k].map(p =>
+        ({ blob: p.blob, w: p.w, h: p.h, time: p.time, name: p.name, marks: p.marks || [] }));
+    }
+    await dbPut('manhole', keep);
+    const n = Object.values(mhState.photos).reduce((a, l) => a + l.length, 0);
+    setStatus(n ? `기본 정보 · 사진 ${n}장 저장됨` : '기본 정보만 저장됨');
+  } catch (e) { setStatus('저장 실패 — 저장 공간을 확인하세요'); }
+}
+async function mhRestore() {
+  try {
+    const s = (await dbGet('manhole')) || {};
+    mhState.tester = s.tester || lsGet('tester');
+    mhState.date = s.date || today();
+    mhState.mgmtNo = s.mgmtNo || '';
+    mhState.repairs = Array.isArray(s.repairs) ? s.repairs.slice() : [];
+    mhState.repairEtc = typeof s.repairEtc === 'string' ? s.repairEtc : '';
+    // 2·4 는 MH_EMPTY() 로 만든 빈 상태 그대로 둔다
+
+    if (mhSameSession()) {                       // 새로고침 → 사진을 되살린다
+      for (const k in (s.photos || {})) {
+        const arr = Array.isArray(s.photos[k]) ? s.photos[k] : [s.photos[k]];
+        const list = arr.filter(p => p && p.blob)
+          .map(p => ({ ...p, marks: p.marks || [], url: URL.createObjectURL(p.blob) }));
+        if (list.length) mhState.photos[k] = list;
+      }
+    } else if (s.photos) {                        // 앱을 새로 연 것 → 사진은 버린다
+      const keep = {};
+      for (const k of MH_KEEP) keep[k] = s[k];
+      keep.photos = {};
+      await dbPut('manhole', keep);
+    }
+  } catch (e) { /* 무시 */ }
+}
+
+/** 사진에 빨간 동그라미를 그려 넣어 새 JPEG 로 만든다 */
+async function mhBake(p) {
+  if (!p.marks || !p.marks.length) return { bytes: new Uint8Array(await p.blob.arrayBuffer()) };
+  let bmp;
+  try { bmp = await createImageBitmap(p.blob); }
+  catch (e) {
+    bmp = await new Promise((res, rej) => {
+      const img = new Image(); img.onload = () => res(img); img.onerror = rej;
+      img.src = URL.createObjectURL(p.blob);
+    });
+  }
+  const w = bmp.width, h = bmp.height;
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.drawImage(bmp, 0, 0, w, h);
+  g.strokeStyle = '#FF0000';
+  g.lineWidth = Math.max(3, Math.round(w * 0.008));
+  for (const m of p.marks) {                    // r 은 사진 가로폭 기준
+    g.beginPath();
+    g.ellipse(m.x * w, m.y * h, m.r * w, m.r * w, 0, 0, Math.PI * 2);
+    g.stroke();
+  }
+  if (bmp.close) bmp.close();
+  const out = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.86));
+  return { bytes: new Uint8Array(await out.arrayBuffer()) };
+}
+
+async function mhMakeExcel() {
+  const btn = document.getElementById('actBtn');
+  await mhSave();
+  if (!mhState.mgmtNo.trim()) { show('err', '맨홀 SK관리번호를 입력하세요.', 3000); return; }
+  const cnt = Object.values(mhState.photos).reduce((a, l) => a + l.length, 0);
+  if (!cnt && !confirm('사진이 없습니다. 그래도 만들까요?')) return;
+
+  btn.disabled = true; setStatus('엑셀 만드는 중…');
+  try {
+    const photos = {};
+    for (const k in mhState.photos) {
+      photos[k] = [];
+      for (const p of mhState.photos[k]) photos[k].push(await mhBake(p));
+    }
+    const ymd0 = mhState.date || today();
+    const out = await ManholeXlsx.build(b64ToBytes(TPL_MANHOLE).buffer, {
+      tester: mhState.tester, date: ymd0.replace(/-/g, '.'), mgmtNo: mhState.mgmtNo,
+      repair: mhRepairText(), cause: mhCauseText(), action: mhRepairText(),
+      note: mhState.note, checks: mhState.checks, photos,
+      sheetDate: ymd0,                       // 시트 이름을 점검일에 맞춘다
+    });
+    const ymd = (mhState.date || today()).slice(2).replace(/-/g, '');
+    download(out, `IOT 맨홀 점검 대장_${safeName(mhState.mgmtNo)}_${ymd}${FILE_EXT}`);
+  } catch (e) {
+    console.error(e);
+    show('err', '엑셀을 만들지 못했습니다.<br>' + (e && e.message ? e.message : ''), 8000);
+  } finally { btn.disabled = false; setStatus('자동 저장됨'); }
+}
+
+/* ---------------- 사진에 빨간 동그라미 표시하기 ---------------- */
+const MARK_R = [0.05, 0.09, 0.15];        // 짧은 변 대비 반지름
+let markCtx = null, markSizeIdx = 1;
+
+function markOpen(key, i) {
+  const p = mhState.photos[key][i];
+  markCtx = { key, i, marks: (p.marks || []).slice() };
+  const b = ManholeXlsx.BOXES.find(x => x.key === key);
+  document.getElementById('markTitle').textContent = b.label + ' — 표시할 곳을 누르세요';
+  const img = document.getElementById('markImg');
+  img.onload = markPaint;                    // 사진이 다 그려진 뒤에 위치를 잡는다
+  img.src = p.url;
+  document.getElementById('markOvl').hidden = false;
+  markSize(markSizeIdx);
+}
+function markSize(n) {
+  markSizeIdx = n;
+  for (let k = 0; k < 3; k++) document.getElementById('mkSz' + k).className = (k === n ? 'on' : '');
+  markPaint();
+}
+function markPaint() {
+  if (!markCtx) return;
+  const inner = document.getElementById('markInner');
+  inner.querySelectorAll('.mk').forEach(el => el.remove());
+  const img = document.getElementById('markImg');
+  const w = img.clientWidth, h = img.clientHeight;
+  for (const m of markCtx.marks) {
+    const d = document.createElement('span');
+    d.className = 'mk';
+    const px = m.r * w * 2;
+    d.style.cssText = `left:${m.x * w}px;top:${m.y * h}px;width:${px}px;height:${px}px`;
+    inner.appendChild(d);
+  }
+}
+function markAdd(ev) {
+  const img = document.getElementById('markImg');
+  const r = img.getBoundingClientRect();
+  const x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height;
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  markCtx.marks.push({ x, y, r: MARK_R[markSizeIdx] });
+  markPaint();
+}
+function markUndo() { markCtx.marks.pop(); markPaint(); }
+function markClear() { markCtx.marks = []; markPaint(); }
+function markDone() {
+  mhState.photos[markCtx.key][markCtx.i].marks = markCtx.marks;
+  document.getElementById('markOvl').hidden = true;
+  markCtx = null;
+  mhSyncInputs(); mhRender(); mhSave();
+}
+
+
+/* =====================================================================
+ * 업무 3 — 과기부 국사 수검 (월별 · 국사를 가로로 누적)
+ * ===================================================================== */
+/* 국사 1곳당 정산 단가는 코드에 넣지 않는다.
+   사용하는 사람이 화면에서 직접 넣고, 그 값은 이 기기에만 기억된다. */
+let auMonths = [];                      // [{ym, sites:n}]  목록만
+let auMonth = null;                     // 현재 열어 둔 달 { ym, sites:[…] }
+let auSiteIdx = -1;
+
+const auKey = ym => 'audit:' + ym;
+
+async function auLoadIndex() {
+  try { auMonths = (await dbGet('audit:index')) || []; }
+  catch (e) { auMonths = []; }
+}
+async function auSaveIndex() {
+  try { await dbPut('audit:index', auMonths); }
+  catch (e) { setStatus('저장 실패 — 저장 공간을 확인하세요'); }
+}
+
+function auRenderMonths() {
+  const box = document.getElementById('auMonths');
+  if (!auMonths.length) {
+    box.innerHTML = '<div class="empty">등록된 월이 없습니다.<br>위에서 월을 추가하세요.</div>';
+    return;
+  }
+  box.innerHTML = '<div class="list">' + auMonths.map(m => `
+    <div class="item">
+      <div class="tx" onclick="auOpenMonth('${esc(m.ym)}')">
+        <b>${esc(m.ym)}</b><span>국사 ${m.sites || 0}곳 · 사진 ${(m.photos || 0)}장</span>
+      </div>
+      <button class="rm" onclick="auDelMonth('${esc(m.ym)}')">삭제</button>
+    </div>`).join('') + '</div>';
+}
+
+async function auAddMonth() {
+  const el = document.getElementById('auNewYm');
+  const ym = el.value.trim();
+  if (!/^\d{4}-\d{1,2}$/.test(ym)) { show('err', '월은 2026-08 형식으로 입력하세요.', 3000); return; }
+  const norm = ym.replace(/^(\d{4})-(\d{1,2})$/, (a, y, m) => `${y}-${String(+m).padStart(2, '0')}`);
+  if (auMonths.some(m => m.ym === norm)) { show('err', '이미 있는 월입니다.', 2500); return; }
+  auMonths.push({ ym: norm, sites: 0, photos: 0 });
+  auMonths.sort((a, b) => a.ym < b.ym ? 1 : -1);
+  await auSaveIndex();
+  await dbPut(auKey(norm), { ym: norm, sites: [] });
+  el.value = '';
+  auRenderMonths();
+  show('ok', `${norm} 을 추가했습니다.`, 2500);
+}
+
+async function auDelMonth(ym) {
+  if (!confirm(`${ym} 의 국사와 사진을 모두 지웁니다. 진행할까요?`)) return;
+  auMonths = auMonths.filter(m => m.ym !== ym);
+  await auSaveIndex();
+  await dbDel(auKey(ym));
+  auRenderMonths();
+}
+
+async function auOpenMonth(ym) {
+  const d = (await dbGet(auKey(ym))) || { ym, sites: [] };
+  // 저장된 blob 에 미리보기 주소를 다시 붙인다
+  d.sites.forEach(s => {
+    s.photos = s.photos || {};
+    s.labels = s.labels || {};
+    for (const k in s.photos) {
+      const cur = s.photos[k];
+      const arr = Array.isArray(cur) ? cur : (cur && cur.blob ? [cur] : []);   // 예전 저장본 호환
+      if (!Array.isArray(cur) && cur && cur.label) s.labels[k] = cur.label;
+      s.photos[k] = arr.filter(p => p && p.blob)
+        .map(p => (p.url ? p : { ...p, url: URL.createObjectURL(p.blob) }));
+    }
+  });
+  auMonth = d;
+  SCREENS.month.sub = ym + ' 정산';
+  go('month');
+}
+
+function auRegionOptions(sel, cur) {
+  sel.innerHTML = AuditXlsx.REGIONS.map(g =>
+    `<option value="${g.key}"${g.key === cur ? ' selected' : ''}>${g.key}</option>`).join('');
+}
+
+/** 화면에 입력된 정산 단가 (숫자, 없으면 0) */
+function auUnit() {
+  const el = document.getElementById('auUnit');
+  const v = parseInt((el ? el.value : '') || lsGet('auUnit'), 10);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}
+function auUnitChanged() {
+  lsSet('auUnit', String(auUnit() || ''));
+  auRenderSummary();
+}
+
+function auRenderMonth() {
+  if (!auMonth) { go('audit'); return; }
+  auRegionOptions(document.getElementById('auNewRegion'), '수도권');
+  document.getElementById('auUnit').value = lsGet('auUnit');
+
+  document.getElementById('auSiteCnt').textContent = `(${auMonth.sites.length}곳)`;
+  const box = document.getElementById('auSites');
+  if (!auMonth.sites.length) {
+    box.innerHTML = '<div class="empty">등록된 국사가 없습니다.<br>위에서 국사를 추가하세요.</div>';
+  } else {
+    box.innerHTML = '<div class="list">' + auMonth.sites.map((s, i) => {
+      const have = Object.values(s.photos || {}).flat().filter(p => p && p.blob).length;
+      const need = 3 + auManholes(s) * 4;          // 전경 3장 + 맨홀당 4장
+      return `<div class="item">
+        <div class="tx" onclick="auOpenSite(${i})">
+          <b>${esc(s.name)}</b><span>${esc(s.region)} · 맨홀 ${auManholes(s)}개 · 사진 ${have}/${need}칸</span>
+        </div>
+        <button class="rm" onclick="auDelSite(${i})">삭제</button>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  auRenderSummary();
+}
+
+/** 정산 요약 (지역별 국사 수 · 금액) */
+function auRenderSummary() {
+  if (!auMonth) return;
+  const cnt = {}; let tot = 0;
+  for (const g of AuditXlsx.REGIONS) cnt[g.key] = 0;
+  for (const s of auMonth.sites) if (cnt[s.region] != null) { cnt[s.region]++; tot++; }
+  const over = AuditXlsx.REGIONS.filter(g => cnt[g.key] > AuditXlsx.MAX_SITES).map(g => g.key);
+  document.getElementById('auSummary').innerHTML =
+    `<div class="hint" style="font-size:12.5px;color:#48596A">` +
+    AuditXlsx.REGIONS.map(g => `${g.key} <b>${cnt[g.key]}</b>곳`).join(' · ') +
+    `<br>합계 <b>${tot}</b>곳` +
+    (auUnit() ? ` · <b>${(tot * auUnit()).toLocaleString()}</b>원 (1곳 ${auUnit().toLocaleString()}원)` : ' · 정산 단가 미입력') +
+    `</div>` +
+    (over.length ? `<div class="msg warn" style="margin-top:10px">${esc(over.join(', '))} 지역이 양식에 준비된 ${AuditXlsx.MAX_SITES}곳을 넘었습니다. 열 너비가 맞지 않을 수 있습니다.</div>` : '');
+}
+
+async function auSaveMonth() {
+  if (!auMonth) return;
+  try {
+    const sites = auMonth.sites.map(s => {
+      const photos = {};
+      for (const k in (s.photos || {})) {
+        const list = (s.photos[k] || []).filter(p => p && p.blob)
+          .map(p => ({ blob: p.blob, w: p.w, h: p.h, time: p.time, name: p.name }));
+        if (list.length) photos[k] = list;
+      }
+      return { region: s.region, name: s.name, manholes: auManholes(s), labels: s.labels || {}, photos };
+    });
+    await dbPut(auKey(auMonth.ym), { ym: auMonth.ym, sites });
+    const m = auMonths.find(x => x.ym === auMonth.ym);
+    if (m) {
+      m.sites = sites.length;
+      m.photos = sites.reduce((a, s) => a + Object.values(s.photos).reduce((x, l) => x + l.length, 0), 0);
+      await auSaveIndex();
+    }
+    setStatus('자동 저장됨');
+  } catch (e) { setStatus('저장 실패 — 저장 공간을 확인하세요'); }
+}
+
+async function auAddSite() {
+  const name = document.getElementById('auNewSite').value.trim();
+  const region = document.getElementById('auNewRegion').value;
+  if (!name) { show('err', '국사명을 입력하세요.', 2500); return; }
+  auMonth.sites.push({ region, name, manholes: AuditXlsx.MANHOLE_MIN, labels: {}, photos: {} });
+  document.getElementById('auNewSite').value = '';
+  await auSaveMonth();
+  auRenderMonth();
+  show('ok', `${esc(name)} 을(를) 추가했습니다. 목록에서 눌러 사진을 넣으세요.`, 3500);
+}
+async function auDelSite(i) {
+  if (!confirm(`${auMonth.sites[i].name} 을(를) 사진까지 지울까요?`)) return;
+  Object.values(auMonth.sites[i].photos || {}).flat().forEach(p => p && p.url && URL.revokeObjectURL(p.url));
+  auMonth.sites.splice(i, 1);
+  await auSaveMonth();
+  auRenderMonth();
+}
+
+function auOpenSite(i) {
+  auSiteIdx = i;
+  SCREENS.site.sub = auMonth.ym + ' · ' + auMonth.sites[i].name;
+  go('site');
+}
+function auBackToMonth() { auSaveMonth().then(() => go('month')); }
+
+function auRenderSite() {
+  const s = auMonth && auMonth.sites[auSiteIdx];
+  if (!s) { go('month'); return; }
+  auRegionOptions(document.getElementById('auSiteRegion'), s.region);
+  document.getElementById('auSiteName').value = s.name;
+  auRenderManholeCount(s);
+
+  const n = auManholes(s);
+  const groups = [];
+
+  // 첫 구획 : 점검 국사 전경 (전경 · 명판 · 스캔본)
+  groups.push({
+    title: `1. 점검 국사 전경_${esc(s.name)}`,
+    slots: [0, 1, 2].map(j => ({ key: `s0_${j}`, def: AuditXlsx.labelOf(0, j) })),
+  });
+  // 그다음부터는 맨홀 번호별로 묶는다 — 현장에서 맨홀 하나씩 찍는 순서와 같다
+  for (let m = 0; m < n; m++) {
+    groups.push({
+      title: `점검 맨홀 #${m + 1}`,
+      slots: [1, 2, 3, 4].map(si => ({
+        key: `s${si}_${m}`,
+        def: AuditXlsx.labelOf(si, m),
+        sub: AuditXlsx.SECTIONS[si].title,
+      })),
+    });
+  }
+
+  document.getElementById('auSiteSlots').innerHTML = groups.map(gp =>
+    `<div class="card sec"><h3>${gp.title}</h3>` + gp.slots.map(sl => {
+      const list = auList(s, sl.key);
+      const label = auLabel(s, sl.key, sl.def);
+      const photos = list.map((p, i) => `
+        <div style="margin-top:${i ? 10 : 0}px">
+          <span class="pvbox"><img src="${p.url}" alt=""></span>
+          <div class="row" style="margin-top:6px">
+            <button class="btn r sm" style="flex:1" onclick="auDelPhoto('${sl.key}',${i})">${i + 1}번 사진 삭제</button>
+          </div>
+        </div>`).join('');
+      return `<div class="slot">
+        <div class="hd"><b>${esc(sl.sub || sl.def)}</b>
+          <span class="tag">${list.length}/${AuditXlsx.MAX_PER_SLOT}장</span></div>
+        <div class="bd">
+          <input class="lb" value="${esc(label)}"
+                 onchange="auSetLabel('${sl.key}',this.value)" placeholder="엑셀에 들어갈 제목">
+          ${photos || '<div class="none">사진 없음</div>'}
+          ${list.length < AuditXlsx.MAX_PER_SLOT ? `<div class="row" style="margin-top:10px">
+            <button class="btn sm" style="flex:1" onclick="auPick('${sl.key}',true)">촬영</button>
+            <button class="btn w sm" style="flex:1" onclick="auPick('${sl.key}',false)">앨범</button>
+          </div>` : ''}
+        </div></div>`;
+    }).join('') + '</div>').join('');
+}
+
+/** 이 국사의 점검 맨홀 수 (4~6) */
+function auManholes(s) {
+  return Math.min(AuditXlsx.MANHOLE_MAX,
+    Math.max(AuditXlsx.MANHOLE_MIN, s.manholes || AuditXlsx.MANHOLE_MIN));
+}
+function auRenderManholeCount(s) {
+  const n = auManholes(s);
+  document.getElementById('auManholeBox').innerHTML =
+    `<div class="seg sm">` +
+    [4, 5, 6].map(v => `<button class="${v === n ? 'on' : ''}" onclick="auSetManholes(${v})">${v}개</button>`).join('') +
+    `</div><div class="hint">기본 4개입니다. 늘리면 엑셀에서 이 국사 블록이 오른쪽으로 넓어집니다.</div>`;
+}
+function auSetManholes(v) {
+  const s = auMonth.sites[auSiteIdx];
+  const cur = auManholes(s);
+  if (v < cur) {
+    // 줄이면 뒤쪽 맨홀 사진이 사라진다
+    let lost = 0;
+    for (let m = v; m < cur; m++) for (let si = 1; si <= 4; si++) lost += auList(s, `s${si}_${m}`).length;
+    if (lost && !confirm(`맨홀 #${v + 1}~#${cur} 의 사진 ${lost}장이 지워집니다. 진행할까요?`)) return;
+    for (let m = v; m < cur; m++) for (let si = 1; si <= 4; si++) {
+      const k = `s${si}_${m}`;
+      auList(s, k).forEach(p => p.url && URL.revokeObjectURL(p.url));
+      delete s.photos[k];
+    }
+  }
+  s.manholes = v;
+  auRenderSite(); auSaveMonth();
+}
+
+/** 사진칸 하나의 사진 목록 (없으면 만든다) */
+function auList(s, key) {
+  const cur = s.photos[key];
+  if (Array.isArray(cur)) return cur;
+  s.photos[key] = cur && cur.blob ? [cur] : [];        // 예전 저장본(1장) 호환
+  if (cur && cur.label) s.labels = Object.assign(s.labels || {}, { [key]: cur.label });
+  return s.photos[key];
+}
+/** 사진칸 이름 (직접 고친 값이 있으면 그것) */
+function auLabel(s, key, def) {
+  return (s.labels && s.labels[key]) || def;
+}
+
+function auSaveSiteInfo() {
+  const s = auMonth.sites[auSiteIdx];
+  s.region = document.getElementById('auSiteRegion').value;
+  s.name = document.getElementById('auSiteName').value;
+  SCREENS.site.sub = auMonth.ym + ' · ' + s.name;
+  document.getElementById('barSub').textContent = SCREENS.site.sub;
+  auSaveMonth();
+}
+function auSetLabel(key, v) {
+  const s = auMonth.sites[auSiteIdx];
+  s.labels = s.labels || {};
+  s.labels[key] = v;
+  auSaveMonth();
+}
+function auPick(key, useCam) {
+  const s = auMonth.sites[auSiteIdx];
+  if (auList(s, key).length >= AuditXlsx.MAX_PER_SLOT) return;
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  if (useCam) inp.capture = 'environment';
+  inp.onchange = async () => {
+    setStatus('사진 처리 중…');
+    try {
+      const p = await pickOne(inp);
+      if (p) { auList(s, key).push(p); auRenderSite(); await auSaveMonth(); }
+    } catch (e) { show('err', '사진을 읽지 못했습니다.', 4000); }
+    setStatus('자동 저장됨');
+  };
+  inp.click();
+}
+function auDelPhoto(key, i) {
+  if (!confirm('이 사진을 지울까요?')) return;
+  const s = auMonth.sites[auSiteIdx];
+  const list = auList(s, key);
+  if (list[i] && list[i].url) URL.revokeObjectURL(list[i].url);
+  list.splice(i, 1);
+  auRenderSite(); auSaveMonth();
+}
+
+async function auMakeExcel() {
+  const btn = document.getElementById('actBtn');
+  if (!auMonth || !auMonth.sites.length) { show('err', '국사를 먼저 추가하세요.', 3000); return; }
+  await auSaveMonth();
+
+  btn.disabled = true; setStatus('엑셀 만드는 중…');
+  try {
+    const sites = [];
+    for (const s of auMonth.sites) {
+      const photos = {};
+      for (const k in (s.photos || {})) {
+        const list = [];
+        for (const p of (s.photos[k] || [])) {
+          if (!p || !p.blob) continue;
+          list.push({ bytes: new Uint8Array(await p.blob.arrayBuffer()), w: p.w, h: p.h,
+            label: (s.labels || {})[k] });
+        }
+        if (list.length) photos[k] = list;
+      }
+      // 사진이 없어도 이름은 바뀔 수 있으므로 라벨만 따로 넘긴다
+      for (const k in (s.labels || {})) if (!photos[k]) photos[k] = [{ label: s.labels[k] }];
+      sites.push({ region: s.region, name: s.name, manholes: auManholes(s), photos });
+    }
+    const out = await AuditXlsx.build(b64ToBytes(TPL_AUDIT).buffer,
+      { ym: auMonth.ym, unit: auUnit(), sites });
+    const mo = String(+auMonth.ym.split('-')[1]);
+    const yy = auMonth.ym.slice(2, 4);
+    download(out, `${yy}년 과기부 국사 수검 ${mo}월 정산요청 세부${FILE_EXT}`);
+  } catch (e) {
+    console.error(e);
+    show('err', '엑셀을 만들지 못했습니다.<br>' + (e && e.message ? e.message : ''), 8000);
+  } finally { btn.disabled = false; setStatus('자동 저장됨'); }
+}
+
+
 /* ---------------- 시작 ---------------- */
 (async function init() {
-  await restore();
-  renderPartner();
-  setQtyMode(state.qtyMode);
-  setSortMode(state.sortMode);
-  renderPhotos();
-  if (!partner) show('warn', '처음 사용하시는군요. <b>협력사</b>를 먼저 지정해 주세요. 한 번만 하면 됩니다.');
+  // 저장소가 느리거나 막혀 있어도 화면은 곧바로 뜨게 한다
+  const paint = () => {
+    renderPartner();
+    setQtyMode(mkState.qtyMode);
+    setSortMode(mkState.sortMode);
+    mkRenderPhotos();
+  };
+  paint();
+  go('home');
+
+  try {
+    await mkRestore();
+    await mhRestore();
+    await auLoadIndex();
+    paint();                       // 불러온 내용으로 다시 그린다
+  } catch (e) {
+    console.error(e);
+    show('warn', '저장해 둔 내용을 불러오지 못했습니다. 새로 작성하면 됩니다.', 6000);
+  }
 })();
 
 </script>
