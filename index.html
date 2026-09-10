@@ -1231,8 +1231,8 @@ const TPL_AUDIT   = "UEsDBBQAAAAIAGmQHF2/EAetFQEAABgDAAATAAAAW0NvbnRlbnRfVHlwZXN
 const MAX_SIDE = 1280;        // 사진 긴 변 최대 픽셀
 const JPEG_Q = 0.8;
 /* 내려받을 파일 확장자. 휴대폰 브라우저가 확장자를 임의로 바꾸는 것을 막으려고
-   .xlw 를 쓴다. 내용은 항상 엑셀(xlsx) 파일이다. '.xlsx' 로 바꿔도 된다. */
-const FILE_EXT = '.xlw';
+   내용은 항상 엑셀(xlsx) 파일이다. '.xlw' 로 바꾸면 확장자만 xlw 로 저장된다. */
+const FILE_EXT = '.xlsx';
 
 /* 포털에서 넘겨준 사용자 아이디가 있으면 사용자별로 기본값을 기억한다 */
 const USER = new URLSearchParams(location.search).get('u') || 'local';
