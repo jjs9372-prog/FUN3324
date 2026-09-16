@@ -126,6 +126,31 @@ input[type=file]{display:none}
 .au-it .t{font-size:13px;font-weight:700;color:#2B3C4C;margin-bottom:8px}
 .au-it .bad{margin-top:9px;padding-top:9px;border-top:1px dashed #E0C7C7}
 .cnt{background:#EAF1F8;color:#1F4E79;font-size:11px;font-weight:700;border-radius:10px;padding:2px 9px;margin-left:6px}
+
+/* ---- 유관기관협의 : 문서 편집 ---- */
+.listage{background:#55697C;border-radius:11px;padding:8px;overflow:auto;-webkit-overflow-scrolling:touch}
+#liStage{position:relative;margin:0 auto;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.28);line-height:0}
+#liStage>img{display:block;width:100%;height:auto}
+.li-it{position:absolute;box-sizing:border-box;touch-action:none;cursor:move}
+.li-it .tx{white-space:pre;line-height:1.35;display:block}
+.li-it img{display:block;width:100%;height:auto;pointer-events:none}
+.li-it.sel{outline:2px dashed #1F4E79;outline-offset:2px}
+.li-it .h{position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.35);touch-action:none;display:none}
+.li-it.sel .h{display:block}
+.li-it .h.sz{right:-15px;bottom:-15px;background:#1F4E79}
+.li-it .h.wd{right:-15px;top:50%;margin-top:-15px;background:#D9822B}
+.li-pg{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.li-pg .btn{white-space:nowrap}
+.li-pg .zm{flex:1 0 100%;max-width:420px;margin:0 auto}
+.li-pg b{font-size:13px;color:#1F4E79;min-width:64px;text-align:center}
+.li-pv{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.li-pv .b{border:1px solid #D5DFE9;border-radius:9px;padding:8px;background:#F7FAFC;text-align:center;min-width:120px}
+.li-pv .b img{display:block;max-width:150px;max-height:64px;margin:0 auto 6px}
+.li-pv .b .n{font-size:11.5px;color:#8798A6}
+.li-ph{border:1px solid #E0E7EE;border-radius:9px;padding:11px 12px;margin-top:9px}
+.li-ph textarea{min-height:66px;font-size:14px}
+.li-ph .ops{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -158,6 +183,11 @@ input[type=file]{display:none}
       <button class="job" onclick="go('audit')">
         <span class="ico">국</span>
         <span class="tx"><b>과기부 국사 수검</b><span>월별로 국사를 모아 정산요청 세부 양식으로 정리</span></span>
+        <span class="go">›</span>
+      </button>
+      <button class="job" onclick="go('liaison')">
+        <span class="ico">협</span>
+        <span class="tx"><b>유관기관협의</b><span>받은 자료에 이름·서명·문구를 얹어 회신본 만들기</span></span>
         <span class="go">›</span>
       </button>
     </div>
@@ -343,12 +373,107 @@ input[type=file]{display:none}
     </div>
     <div id="auSiteSlots"></div>
   </section>
+
+  <!-- ===================== 4. 유관기관협의 ===================== -->
+  <section id="scr-liaison" hidden>
+    <div class="card">
+      <h2><span class="n">1</span> 내 정보</h2>
+      <div id="liInfoView" style="display:none">
+        <span class="tag" id="liInfoText"></span>
+        <button class="btn w sm" style="margin-left:8px" onclick="liInfoEdit()">변경</button>
+        <div class="hint">비워 둔 칸은 문서에 얹기 버튼이 나오지 않습니다.</div>
+      </div>
+      <div id="liInfoEditBox">
+        <label>이름</label>
+        <input type="text" id="liName" placeholder="예: 홍길동">
+        <label>소속 <span class="cnt">필요할 때만</span></label>
+        <input type="text" id="liOrg" placeholder="예: SKO 강남전송운용팀">
+        <label>직책 <span class="cnt">필요할 때만</span></label>
+        <input type="text" id="liRank" placeholder="예: 매니저">
+        <label>연락처 <span class="cnt">필요할 때만</span></label>
+        <input type="text" id="liTel" placeholder="예: 010-0000-0000">
+        <div style="margin-top:12px"><button class="btn" onclick="liInfoSave()">저장</button></div>
+        <div class="hint">한 번 저장하면 이 기기에서 계속 쓰입니다.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">2</span> 서명 · 도장</h2>
+      <div class="row">
+        <button class="btn w" onclick="liSignOpen()">자필 서명 그리기</button>
+        <button class="btn w" onclick="liPickStamp()">서명·도장 이미지</button>
+      </div>
+      <input type="file" id="liStampFile" accept="image/*" onchange="liStampChosen(event)">
+      <div class="li-pv" id="liSignBox"></div>
+      <div class="hint">둘 다 만들어 두면 문서에서 그때그때 골라 쓸 수 있습니다.
+        이미지는 흰 배경을 자동으로 빼서 문서 위에 겹쳐도 자연스럽게 들어갑니다.</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">3</span> 자주 쓰는 문구</h2>
+      <div id="liPhrases"></div>
+      <button class="btn w full sm" style="margin-top:11px" onclick="liPhraseAdd()">+ 문구 추가</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">4</span> 자료 올리기</h2>
+      <button class="btn full" onclick="liPickDoc()">한글 · PDF · 이미지 고르기</button>
+      <input type="file" id="liDocFile" multiple onchange="liDocChosen(event)">
+      <div class="hint"><b>한글 파일(.hwp)</b>은 첫 장이 바로 열립니다. 한글이 파일 안에 넣어 둔
+        화면을 그대로 쓰므로 모양이 달라지지 않습니다.<br>
+        여러 장짜리이거나 더 또렷해야 하면 한글에서 <b>PDF로 저장</b>해 올려 주세요.<br>
+        올린 자료는 <b>앱을 새로 열면 지워집니다.</b> 그날 작업은 그날 저장까지 끝내 주세요.</div>
+      <div id="liDocInfo"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 유관기관협의 : 문서 편집 ===================== -->
+  <section id="scr-lidoc" hidden>
+    <div class="li-pg" id="liPager"></div>
+    <div class="listage"><div id="liStage"></div></div>
+
+    <div class="card" style="margin-top:13px">
+      <h2>문서에 얹기</h2>
+      <div class="chips" id="liAddChips"></div>
+      <div class="hint">얹은 뒤에는 손가락으로 끌어서 옮기고, 파란 동그라미로 크기를,
+        주황 동그라미로 글 칸 너비를 조절합니다.</div>
+    </div>
+
+    <div class="card" id="liSelCard" style="display:none">
+      <h2>선택한 항목</h2>
+      <div id="liSelBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>저장</h2>
+      <div class="row">
+        <button class="btn w" style="flex:1" onclick="liSaveJpg()">이미지로 저장</button>
+        <button class="btn w" style="flex:1" onclick="liLayoutLoad()">지난 배치 불러오기</button>
+      </div>
+      <div class="hint">저장할 때 지금 배치를 기억해 둡니다. 같은 양식을 또 받으면
+        <b>지난 배치 불러오기</b>로 그대로 꺼내 쓸 수 있습니다.</div>
+    </div>
+  </section>
 </div>
 
 <div class="foot"><div class="in">
   <span class="st" id="status">자동 저장됨</span>
   <button class="btn" id="actBtn" onclick="footAction()">엑셀 만들기</button>
 </div></div>
+
+
+<!-- ===== 자필 서명 그리기 ===== -->
+<div class="ovl" id="liSignOvl" hidden>
+  <div class="top">
+    <span class="t">자필 서명 — 손가락으로 쓰세요</span>
+    <button class="clr" onclick="liSignClear()">지우기</button>
+  </div>
+  <div class="stage"><canvas id="liSignCv" style="background:#fff;border-radius:11px;touch-action:none"></canvas></div>
+  <div class="bot">
+    <button class="btn w" onclick="liSignCancel()">취소</button>
+    <button class="btn" onclick="liSignSave()">저장</button>
+  </div>
+</div>
 
 <!-- ===== 사진에 빨간 동그라미 표시하기 ===== -->
 <div class="ovl" id="markOvl" hidden>
@@ -1556,6 +1681,8 @@ const SCREENS = {
   audit:   { el: 'scr-audit',   title: '과기부 국사 수검', sub: '정산 월을 고르세요',          back: 'home',  act: null },
   month:   { el: 'scr-month',   title: '국사 수검',       sub: '',                            back: 'audit', act: ['이 달 엑셀 만들기', 'auMakeExcel'] },
   site:    { el: 'scr-site',    title: '국사 사진',       sub: '',                            back: 'month', act: ['목록으로', 'auBackToMonth'] },
+  liaison: { el: 'scr-liaison', title: '유관기관협의',    sub: '받은 자료에 이름·서명 얹기',   back: 'home',  act: null },
+  lidoc:   { el: 'scr-lidoc',   title: '문서 편집',       sub: '',                            back: 'liaison', act: ['PDF로 저장', 'liSavePdf'] },
 };
 let screen = 'home';
 
@@ -1578,6 +1705,8 @@ function go(name) {
   if (name === 'month') auRenderMonth();
   if (name === 'site') auRenderSite();
   if (name === 'manhole') mhRender();
+  if (name === 'liaison') liRenderSetup();
+  if (name === 'lidoc') { liRenderDoc(); setTimeout(liFixFontSizes, 60); }
 }
 function back() { const s = SCREENS[screen]; if (s.back) go(s.back); }
 function footAction() { const s = SCREENS[screen]; if (s.act) window[s.act[1]](); }
@@ -2582,6 +2711,957 @@ async function auMakeExcel() {
 }
 
 
+
+/* =====================================================================
+ * 업무 4 — 유관기관협의
+ *   받은 자료(PDF·이미지) 위에 이름·서명·문구를 얹어 회신본을 만든다.
+ * ===================================================================== */
+
+const LI_FONT = '"Malgun Gothic","맑은 고딕",-apple-system,sans-serif';
+const LI_COLORS = [['검정', '#000000'], ['파랑', '#0B3D91'], ['빨강', '#C0272D']];
+const LI_PHRASES_DEFAULT = [
+  '해당 주소지는 SKT 지중시설물 매설 구간으로 공사 전 사전 연락(입회 필수) 바랍니다. 시설물 훼손 시 복구 비용 및 관련 책임은 원인자에게 있습니다.',
+  '해당 주소지는 SKB 관로 내 SKT 광케이블 임차 구간으로 공사 전 사전 연락(입회 필수) 바랍니다. 시설물(관로·케이블) 훼손 시 복구 비용 및 관련 책임은 원인자에게 있습니다.',
+  '해당 주소지는 타사 관로 내 SKT 광케이블 임차 구간으로 공사 전 사전 연락(입회 필수) 바랍니다. 시설물(관로·케이블) 훼손 시 복구 비용 및 관련 책임은 원인자에게 있습니다.',
+  '해당 주소지는 SKT 시설물이 확인되지 않습니다. 다만, 굴착 중 미확인 케이블 발견 등 특이사항 발생 시 즉시 공사를 중단하고 연락 바랍니다.',
+];
+
+/* 내 정보·서명·문구 — 이 기기에 저장된다 */
+let liSet = { name: '', org: '', rank: '', tel: '', sign: '', stamp: '',
+              phrases: LI_PHRASES_DEFAULT.slice() };
+/* 지금 열어 둔 문서 — 앱을 새로 열면 비워진다 */
+let liDoc = null;          // { name, pages:[{url,w,h,ptW,ptH,items:[]}], cur }
+let liSelId = null;
+let liSeq = 0;
+
+/* ---------------- 설정 읽고 쓰기 ---------------- */
+async function liLoadSet() {
+  let v = null;
+  try { v = await dbGet('li.set'); } catch (e) { /* 무시 */ }
+  liSet = Object.assign({ name: '', org: '', rank: '', tel: '', sign: '', stamp: '', phrases: null },
+                        v || {});
+  if (!Array.isArray(liSet.phrases) || !liSet.phrases.length) {
+    liSet.phrases = LI_PHRASES_DEFAULT.slice();
+  }
+}
+async function liSaveSet() { try { await dbPut('li.set', liSet); } catch (e) { /* 무시 */ } }
+
+/* ---------------- 1. 내 정보 ---------------- */
+function liInfoEdit() {
+  document.getElementById('liInfoView').style.display = 'none';
+  document.getElementById('liInfoEditBox').style.display = 'block';
+}
+function liInfoSave() {
+  const g = id => document.getElementById(id).value.trim();
+  if (!g('liName')) { show('err', '이름은 넣어 주세요.', 2500); return; }
+  liSet.name = g('liName'); liSet.org = g('liOrg');
+  liSet.rank = g('liRank'); liSet.tel = g('liTel');
+  liSaveSet();
+  liRenderInfo();
+  show('ok', '저장했습니다.', 2500);
+}
+function liRenderInfo() {
+  const done = !!liSet.name;
+  document.getElementById('liInfoView').style.display = done ? 'block' : 'none';
+  document.getElementById('liInfoEditBox').style.display = done ? 'none' : 'block';
+  const parts = [liSet.name, liSet.org, liSet.rank, liSet.tel].filter(Boolean);
+  document.getElementById('liInfoText').textContent = parts.join(' · ');
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
+  set('liName', liSet.name); set('liOrg', liSet.org);
+  set('liRank', liSet.rank); set('liTel', liSet.tel);
+}
+
+/* ---------------- 2. 서명 · 도장 ---------------- */
+function liRenderSign() {
+  const box = document.getElementById('liSignBox');
+  const one = (key, label) => liSet[key]
+    ? `<div class="b"><img src="${liSet[key]}" alt=""><div class="n">${label}</div>
+         <button class="btn w sm" style="margin-top:7px" onclick="liSignDel('${key}')">지우기</button></div>`
+    : '';
+  const html = one('sign', '자필 서명') + one('stamp', '서명·도장 이미지');
+  box.innerHTML = html || '<div class="hint" style="margin:0">아직 만들어 둔 서명이 없습니다.</div>';
+}
+function liSignDel(key) { liSet[key] = ''; liSaveSet(); liRenderSign(); }
+function liPickStamp() { document.getElementById('liStampFile').click(); }
+
+/** 흰 배경을 투명하게 뺀다 — 문서 위에 겹쳐도 네모가 보이지 않게 */
+async function liStampChosen(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!f) return;
+  try {
+    const img = await liLoadImage(URL.createObjectURL(f));
+    const sc = Math.min(1, 900 / Math.max(img.width, img.height));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+    const cx = cv.getContext('2d');
+    cx.drawImage(img, 0, 0, cv.width, cv.height);
+    const d = cx.getImageData(0, 0, cv.width, cv.height), a = d.data;
+    for (let i = 0; i < a.length; i += 4) {
+      const m = Math.min(a[i], a[i + 1], a[i + 2]);
+      if (m > 236) a[i + 3] = 0;                      // 거의 흰색 → 완전 투명
+      else if (m > 200) a[i + 3] = Math.round(a[i + 3] * (236 - m) / 36);
+    }
+    cx.putImageData(d, 0, 0);
+    liSet.stamp = liTrim(cv).toDataURL('image/png');
+    await liSaveSet();
+    liRenderSign();
+    show('ok', '서명·도장 이미지를 저장했습니다.', 2500);
+  } catch (e) {
+    console.error(e);
+    show('err', '이미지를 읽지 못했습니다.', 4000);
+  }
+}
+function liLoadImage(src) {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => rej(new Error('이미지를 열 수 없습니다'));
+    im.src = src;
+  });
+}
+/** 투명한 여백을 잘라낸다 */
+function liTrim(cv) {
+  const cx = cv.getContext('2d');
+  const d = cx.getImageData(0, 0, cv.width, cv.height).data;
+  let x0 = cv.width, y0 = cv.height, x1 = -1, y1 = -1;
+  for (let y = 0; y < cv.height; y++) {
+    for (let x = 0; x < cv.width; x++) {
+      if (d[(y * cv.width + x) * 4 + 3] > 16) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+  }
+  if (x1 < 0) return cv;
+  const pad = 4;
+  x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
+  x1 = Math.min(cv.width - 1, x1 + pad); y1 = Math.min(cv.height - 1, y1 + pad);
+  const out = document.createElement('canvas');
+  out.width = x1 - x0 + 1; out.height = y1 - y0 + 1;
+  out.getContext('2d').drawImage(cv, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+  return out;
+}
+
+/* ----- 자필 서명 그리기 ----- */
+let liPen = { on: false, last: null };
+function liSignOpen() {
+  const ovl = document.getElementById('liSignOvl');
+  ovl.hidden = false;
+  const cv = document.getElementById('liSignCv');
+  const w = Math.min(640, Math.round(window.innerWidth - 40));
+  cv.width = w * 2; cv.height = Math.round(w * 0.46) * 2;     // 선명하게 2배로
+  cv.style.width = w + 'px';
+  cv.style.height = Math.round(w * 0.46) + 'px';
+  const cx = cv.getContext('2d');
+  cx.clearRect(0, 0, cv.width, cv.height);
+  cx.lineWidth = 5; cx.lineCap = 'round'; cx.lineJoin = 'round'; cx.strokeStyle = '#111';
+  if (!cv._wired) {
+    cv._wired = true;
+    const pt = e => {
+      const r = cv.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height };
+    };
+    cv.addEventListener('pointerdown', e => {
+      e.preventDefault(); cv.setPointerCapture(e.pointerId);
+      liPen.on = true; liPen.last = pt(e);
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!liPen.on) return;
+      e.preventDefault();
+      const p = pt(e), c = cv.getContext('2d');
+      c.beginPath(); c.moveTo(liPen.last.x, liPen.last.y); c.lineTo(p.x, p.y); c.stroke();
+      liPen.last = p;
+    });
+    const up = () => { liPen.on = false; };
+    cv.addEventListener('pointerup', up);
+    cv.addEventListener('pointercancel', up);
+  }
+}
+function liSignClear() {
+  const cv = document.getElementById('liSignCv');
+  cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+}
+function liSignCancel() { document.getElementById('liSignOvl').hidden = true; }
+async function liSignSave() {
+  const cv = document.getElementById('liSignCv');
+  const t = liTrim(cv);
+  if (t.width < 12 || t.height < 12) { show('err', '서명을 먼저 그려 주세요.', 2500); return; }
+  liSet.sign = t.toDataURL('image/png');
+  await liSaveSet();
+  document.getElementById('liSignOvl').hidden = true;
+  liRenderSign();
+  show('ok', '자필 서명을 저장했습니다.', 2500);
+}
+
+/* ---------------- 3. 자주 쓰는 문구 ---------------- */
+function liRenderPhrases() {
+  const box = document.getElementById('liPhrases');
+  box.innerHTML = liSet.phrases.map((t, i) => `
+    <div class="li-ph">
+      <label style="margin-top:0">문구 ${i + 1}</label>
+      <textarea oninput="liPhraseEdit(${i}, this.value)">${esc(t)}</textarea>
+      <div class="ops"><button class="btn w sm" onclick="liPhraseDel(${i})">지우기</button></div>
+    </div>`).join('') ||
+    '<div class="hint" style="margin:0">문구가 없습니다. 아래에서 추가하세요.</div>';
+}
+function liPhraseEdit(i, v) { liSet.phrases[i] = v; liSaveSet(); }
+function liPhraseDel(i) { liSet.phrases.splice(i, 1); liSaveSet(); liRenderPhrases(); }
+function liPhraseAdd() { liSet.phrases.push(''); liSaveSet(); liRenderPhrases(); }
+
+function liRenderSetup() { liRenderInfo(); liRenderSign(); liRenderPhrases(); liRenderDocInfo(); }
+function liRenderDocInfo() {
+  const el = document.getElementById('liDocInfo');
+  if (!el) return;
+  el.innerHTML = liDoc
+    ? `<div class="msg ok" style="margin:12px 0 0"><b>${esc(liDoc.name)}</b> · ${liDoc.pages.length}장<br>
+         <button class="btn sm" style="margin-top:9px" onclick="go('lidoc')">이어서 편집하기</button></div>`
+    : '';
+}
+
+/* ---------------- 4. 자료 올리기 ---------------- */
+function liPickDoc() {
+  if (!liSet.name) { show('err', '먼저 내 정보를 저장하세요.', 3000); return; }
+  document.getElementById('liDocFile').click();
+}
+
+let liPdfjs = null;
+async function liLoadPdfjs() {
+  if (liPdfjs) return liPdfjs;
+  const mod = await import('./pdfjs/pdf.min.js');
+  mod.GlobalWorkerOptions.workerSrc = './pdfjs/pdf.worker.min.js';
+  liPdfjs = mod;
+  return mod;
+}
+
+async function liDocChosen(ev) {
+  const files = [...(ev.target.files || [])];
+  ev.target.value = '';
+  if (!files.length) return;
+  setStatus('자료를 읽는 중…');
+  show('warn', '자료를 읽는 중입니다. 장수가 많으면 잠시 걸립니다.', 0);
+  try {
+    const pages = [];
+    let hwp = false;
+    for (const f of files) {
+      if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
+        pages.push(...await liReadPdf(f));
+      } else if (/\.hwpx?$/i.test(f.name)) {
+        pages.push(await liReadHangul(f));
+        hwp = true;
+      } else if (/^image\//.test(f.type) || /\.(jpe?g|png|gif|bmp|webp)$/i.test(f.name)) {
+        pages.push(await liReadImage(f));
+      }
+    }
+    if (!pages.length) { show('err', '한글·PDF·이미지 파일을 골라 주세요.', 5000); return; }
+    liDoc = { name: files[0].name.replace(/\.[^.]+$/, ''), pages, cur: 0 };
+    liSelId = null;
+    show('', '');
+    go('lidoc');
+    if (hwp) show('warn', '한글 파일은 <b>첫 장</b>만 들어옵니다. ' +
+      '여러 장이거나 더 또렷해야 하면 한글에서 <b>PDF로 저장</b>해 올려 주세요.', 9000);
+  } catch (e) {
+    console.error(e);
+    show('err', '자료를 읽지 못했습니다.<br>' + (e && e.message ? e.message : ''), 9000);
+  } finally { setStatus('자동 저장됨'); }
+}
+
+
+/* ---------------- 한글 파일 열기 ----------------
+   한글은 저장할 때 '첫 페이지 미리보기 그림'을 파일 안에 같이 넣어 둔다.
+   그 그림을 그대로 꺼내 쓴다. 우리가 다시 그리는 것이 아니라
+   한글이 만들어 둔 화면 그대로다. */
+
+/** .hwp 는 여러 개의 스트림이 들어 있는 통(OLE 복합문서) 이다. 그 통을 연다. */
+function liReadCfb(buf) {
+  const u8 = new Uint8Array(buf);
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  const SIG = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1];
+  for (let i = 0; i < 8; i++) if (u8[i] !== SIG[i]) throw new Error('한글 파일이 아닙니다.');
+
+  const ssz = 1 << dv.getUint16(30, true);
+  const mssz = 1 << dv.getUint16(32, true);
+  const dirStart = dv.getUint32(48, true);
+  const miniFatStart = dv.getUint32(60, true);
+  const difStart = dv.getUint32(68, true);
+  let nDif = dv.getUint32(72, true);
+  const sect = n => u8.subarray((n + 1) * ssz, (n + 2) * ssz);
+
+  const fatSecs = [];
+  for (let i = 0; i < 109; i++) {
+    const v = dv.getUint32(76 + 4 * i, true);
+    if (v < 0xFFFFFFFA) fatSecs.push(v);
+  }
+  let nx = difStart, guard = 0;
+  while (nDif > 0 && nx < 0xFFFFFFFA && guard++ < 10000) {
+    const s = sect(nx), sv = new DataView(s.buffer, s.byteOffset, s.byteLength);
+    for (let i = 0; i < ssz / 4 - 1; i++) {
+      const v = sv.getUint32(4 * i, true);
+      if (v < 0xFFFFFFFA) fatSecs.push(v);
+    }
+    nx = sv.getUint32(ssz - 4, true); nDif--;
+  }
+  const fat = [];
+  for (const fs of fatSecs) {
+    const s = sect(fs);
+    if (!s.length) continue;
+    const sv = new DataView(s.buffer, s.byteOffset, s.byteLength);
+    for (let i = 0; i < ssz / 4; i++) fat.push(sv.getUint32(4 * i, true));
+  }
+
+  function chainBytes(start, size) {
+    const parts = []; let c = start, g = 0, total = 0;
+    while (c < 0xFFFFFFFA && g++ < 300000) {
+      const s = sect(c);
+      if (!s.length) break;
+      parts.push(s); total += s.length;
+      c = (c < fat.length) ? fat[c] : 0xFFFFFFFE;
+    }
+    const out = new Uint8Array(total);
+    let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    return (size != null && size < total) ? out.subarray(0, size) : out;
+  }
+
+  const dirB = chainBytes(dirStart);
+  const ddv = new DataView(dirB.buffer, dirB.byteOffset, dirB.byteLength);
+  const entries = [];
+  for (let i = 0; i * 128 + 128 <= dirB.length; i++) {
+    const o = i * 128;
+    const nlen = ddv.getUint16(o + 64, true);
+    let name = '';
+    for (let j = 0; j + 1 < Math.max(0, nlen - 2); j += 2) name += String.fromCharCode(ddv.getUint16(o + j, true));
+    entries.push({ name, type: dirB[o + 66], start: ddv.getUint32(o + 116, true), size: ddv.getUint32(o + 120, true) });
+  }
+  if (!entries.length) throw new Error('한글 파일을 읽지 못했습니다.');
+
+  const root = entries[0];
+  const miniData = chainBytes(root.start, root.size);
+  const mfatB = chainBytes(miniFatStart);
+  const mdv = new DataView(mfatB.buffer, mfatB.byteOffset, mfatB.byteLength);
+  function readMini(start, size) {
+    const out = new Uint8Array(size);
+    let o = 0, c = start, g = 0;
+    while (c < 0xFFFFFFFA && o < size && g++ < 300000) {
+      const piece = miniData.subarray(c * mssz, (c + 1) * mssz);
+      const take = Math.min(piece.length, size - o);
+      out.set(piece.subarray(0, take), o);
+      o += take;
+      c = (4 * c + 4 <= mfatB.length) ? mdv.getUint32(4 * c, true) : 0xFFFFFFFE;
+    }
+    return out;
+  }
+  const read = name => {
+    const e = entries.find(x => x.type === 2 && x.name === name);
+    if (!e) return null;
+    return e.size < 4096 ? readMini(e.start, e.size) : chainBytes(e.start, e.size);
+  };
+  return { entries, read };
+}
+
+/** .hwpx 는 압축 파일이다. 그 안에서 파일 하나를 꺼낸다. */
+async function liZipFind(buf, test) {
+  const u8 = new Uint8Array(buf);
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= 0 && i > u8.length - 22 - 65536; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('한글 파일을 읽지 못했습니다.');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const td = new TextDecoder('utf-8');
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true);
+    const extraLen = dv.getUint16(p + 30, true);
+    const cmtLen = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const name = td.decode(u8.subarray(p + 46, p + 46 + nameLen));
+    if (test(name)) {
+      const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+      const raw = u8.subarray(start, start + compSize);
+      if (method === 0) return raw.slice();
+      const ds = new DecompressionStream('deflate-raw');
+      const st = new Blob([raw]).stream().pipeThrough(ds);
+      return new Uint8Array(await new Response(st).arrayBuffer());
+    }
+    p += 46 + nameLen + extraLen + cmtLen;
+  }
+  return null;
+}
+
+function liImgType(b) {
+  if (b[0] === 0x89 && b[1] === 0x50) return 'image/png';
+  if (b[0] === 0x42 && b[1] === 0x4D) return 'image/bmp';
+  if (b[0] === 0xFF && b[1] === 0xD8) return 'image/jpeg';
+  return 'image/png';
+}
+
+/** 한글 파일 → 첫 장 한 쪽 */
+async function liReadHangul(file) {
+  const buf = await file.arrayBuffer();
+  let prv = null;
+  if (/\.hwpx$/i.test(file.name)) {
+    prv = await liZipFind(buf, n => /(^|\/)Preview\/PrvImage\.(png|bmp|jpg|jpeg)$/i.test(n));
+  } else {
+    prv = liReadCfb(buf).read('PrvImage');
+  }
+  if (!prv || prv.length < 200) {
+    throw new Error('이 한글 파일에는 미리보기 그림이 저장돼 있지 않습니다.<br>' +
+      '한글에서 <b>PDF로 저장</b>한 뒤 올려 주세요.');
+  }
+  const img = await liLoadImage(URL.createObjectURL(new Blob([prv], { type: liImgType(prv) })));
+
+  // 글씨가 또렷하게 나오도록 두 배로 키워서 담는다 (원본 그림은 그대로 확대만)
+  const sc = 2;
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(img.width * sc);
+  cv.height = Math.round(img.height * sc);
+  const cx = cv.getContext('2d');
+  cx.imageSmoothingEnabled = true;
+  if ('imageSmoothingQuality' in cx) cx.imageSmoothingQuality = 'high';
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.drawImage(img, 0, 0, cv.width, cv.height);
+
+  // 종이 크기는 A4 로 맞춘다 (가로로 긴 문서면 눕힌 A4)
+  const A4 = 595.28, A4L = 841.89;
+  const land = img.width > img.height;
+  const ptW = land ? A4L : A4;
+  const ptH = ptW * img.height / img.width;
+  return liPageFromCanvas(cv, ptW, ptH);
+}
+
+/** PDF 한 권을 장별 그림으로 바꾼다 */
+async function liReadPdf(file) {
+  const pdfjs = await liLoadPdfjs();
+  const buf = await file.arrayBuffer();
+  const doc = await pdfjs.getDocument({
+    data: buf,
+    cMapUrl: './pdfjs/cmaps/', cMapPacked: true,
+    standardFontDataUrl: './pdfjs/standard_fonts/',
+  }).promise;
+  const out = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const pg = await doc.getPage(i);
+    const v1 = pg.getViewport({ scale: 1 });
+    const sc = Math.max(1, Math.min(3, 1500 / v1.width));
+    const vp = pg.getViewport({ scale: sc });
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+    const cx = cv.getContext('2d');
+    cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+    await pg.render({ canvasContext: cx, viewport: vp }).promise;
+    out.push(await liPageFromCanvas(cv, v1.width, v1.height));
+    cv.width = cv.height = 0;                       // 메모리 정리
+  }
+  try { await doc.destroy(); } catch (e) { /* 무시 */ }
+  return out;
+}
+
+async function liReadImage(file) {
+  const img = await liLoadImage(URL.createObjectURL(file));
+  const sc = Math.min(1, 2000 / Math.max(img.width, img.height));
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.drawImage(img, 0, 0, cv.width, cv.height);
+  return liPageFromCanvas(cv, cv.width * 0.75, cv.height * 0.75);
+}
+
+function liPageFromCanvas(cv, ptW, ptH) {
+  const w = cv.width, h = cv.height;
+  return new Promise(res => {
+    cv.toBlob(b => res({ url: URL.createObjectURL(b), w, h, ptW, ptH, items: [] }),
+      'image/jpeg', 0.9);
+  });
+}
+
+/* ---------------- 편집 화면 ---------------- */
+function liPage() { return liDoc && liDoc.pages[liDoc.cur]; }
+
+function liRenderDoc() {
+  if (!liDoc) { go('liaison'); return; }
+  document.getElementById('barSub').textContent =
+    `${liDoc.name} · ${liDoc.cur + 1}/${liDoc.pages.length}장`;
+  liRenderPager();
+  liRenderStage();
+  liRenderChips();
+  liRenderSel();
+}
+
+let liZoom = 1;
+const LI_ZOOMS = [[1, '화면 맞춤'], [1.6, '160%'], [2.4, '240%'], [3.5, '350%']];
+function liRenderPager() {
+  const el = document.getElementById('liPager');
+  const pager = liDoc.pages.length < 2 ? '' : `
+    <button class="btn w sm" onclick="liGoPage(-1)" ${liDoc.cur === 0 ? 'disabled' : ''}>◀ 이전</button>
+    <b>${liDoc.cur + 1} / ${liDoc.pages.length}</b>
+    <button class="btn w sm" onclick="liGoPage(1)" ${liDoc.cur === liDoc.pages.length - 1 ? 'disabled' : ''}>다음 ▶</button>`;
+  el.innerHTML = pager +
+    '<div class="seg tiny zm">' +
+    LI_ZOOMS.map(([z, n], i) =>
+      `<button class="${liZoom === z ? 'on' : ''}" onclick="liSetZoom(${i})">${n}</button>`).join('') +
+    '</div>';
+}
+function liSetZoom(i) {
+  liZoom = LI_ZOOMS[i][0];
+  const st = document.getElementById('liStage');
+  st.style.width = (liZoom * 100) + '%';
+  st.style.maxWidth = liZoom > 1 ? 'none' : '100%';
+  liFixFontSizes();
+  liRenderPager();
+}
+function liGoPage(d) {
+  const n = liDoc.cur + d;
+  if (n < 0 || n >= liDoc.pages.length) return;
+  liDoc.cur = n; liSelId = null;
+  liRenderDoc();
+}
+
+function liRenderStage() {
+  const st = document.getElementById('liStage');
+  const pg = liPage();
+  st.innerHTML = `<img src="${pg.url}" alt="" draggable="false">`;
+  st.style.aspectRatio = pg.w + ' / ' + pg.h;
+  st.style.width = (liZoom * 100) + '%';
+  st.style.maxWidth = liZoom > 1 ? 'none' : '100%';
+  if (!st._wired) {
+    st._wired = true;
+    st.addEventListener('pointerdown', e => {          // 빈 곳을 누르면 선택 해제
+      if (e.target === st || e.target.tagName === 'IMG') liSelect(null);
+    });
+  }
+  for (const it of pg.items) st.appendChild(liItemEl(it));
+}
+
+/* 글줄을 미리 나눠 둔다 — 화면과 저장본이 똑같이 나오게 */
+let liMeasureCx = null;
+function liWrap(text, fontPx, boxPx, bold) {
+  if (!liMeasureCx) liMeasureCx = document.createElement('canvas').getContext('2d');
+  const cx = liMeasureCx;
+  cx.font = (bold ? '700 ' : '') + fontPx + 'px ' + LI_FONT;
+  const out = [];
+  for (const para of String(text == null ? '' : text).split('\n')) {
+    if (!para) { out.push(''); continue; }
+    let line = '', word = '';
+    const flushWord = () => { line += word; word = ''; };
+    for (const ch of para) {
+      const isLatin = /[A-Za-z0-9.,%()\-/]/.test(ch);
+      const cand = line + word + ch;
+      if (cx.measureText(cand).width > boxPx && (line || word)) {
+        if (isLatin && line) { out.push(line); line = ''; }   // 낱말째 다음 줄로
+        else { flushWord(); out.push(line); line = ''; }
+      }
+      if (isLatin) word += ch; else { flushWord(); line += ch; }
+    }
+    flushWord();
+    out.push(line);
+  }
+  return out;
+}
+function liReflow(it) {
+  const pg = liPage();
+  if (it.kind !== 'text') return;
+  it.lines = liWrap(it.text, it.size * pg.w, it.w * pg.w, it.bold);
+}
+
+function liItemEl(it) {
+  const pg = liPage();
+  const d = document.createElement('div');
+  d.className = 'li-it' + (it.id === liSelId ? ' sel' : '');
+  d.dataset.id = it.id;
+  d.style.left = (it.x * 100) + '%';
+  d.style.top = (it.y * 100) + '%';
+  d.style.width = (it.w * 100) + '%';
+  if (it.kind === 'text') {
+    if (!it.lines) liReflow(it);
+    const sp = document.createElement('span');
+    sp.className = 'tx';
+    sp.style.fontFamily = LI_FONT;
+    const sw = document.getElementById('liStage').clientWidth || pg.w;
+    sp.style.fontSize = (it.size * sw) + 'px';
+    sp.style.color = it.color;
+    sp.style.fontWeight = it.bold ? '700' : '400';
+    sp.textContent = it.lines.join('\n');
+    d.appendChild(sp);
+  } else {
+    const im = document.createElement('img');
+    im.src = it.data;
+    d.appendChild(im);
+  }
+  const h1 = document.createElement('div'); h1.className = 'h sz'; h1.dataset.h = 'sz';
+  d.appendChild(h1);
+  if (it.kind === 'text') {
+    const h2 = document.createElement('div'); h2.className = 'h wd'; h2.dataset.h = 'wd';
+    d.appendChild(h2);
+  }
+  liWireItem(d, it);
+  return d;
+}
+
+/* 화면 폭이 바뀌어도 글자 크기가 문서에 맞게 따라가도록 stage 를 기준으로 한다 */
+function liFixFontSizes() {
+  const st = document.getElementById('liStage');
+  const sw = st.clientWidth || 1;
+  const pg = liPage();
+  if (!pg) return;
+  st.querySelectorAll('.li-it').forEach(d => {
+    const it = pg.items.find(x => x.id === d.dataset.id);
+    if (!it || it.kind !== 'text') return;
+    const sp = d.querySelector('.tx');
+    if (sp) sp.style.fontSize = (it.size * sw) + 'px';
+  });
+}
+
+function liWireItem(d, it) {
+  let mode = null, st0 = null;
+  const stage = () => document.getElementById('liStage');
+  const onDown = e => {
+    const h = e.target && e.target.dataset ? e.target.dataset.h : null;
+    e.preventDefault(); e.stopPropagation();
+    liSelect(it.id);
+    d.setPointerCapture(e.pointerId);
+    const r = stage().getBoundingClientRect();
+    mode = h || 'move';
+    st0 = { px: e.clientX, py: e.clientY, sw: r.width, sh: r.height,
+            x: it.x, y: it.y, w: it.w, size: it.size };
+  };
+  const onMove = e => {
+    if (!mode) return;
+    e.preventDefault();
+    const dx = (e.clientX - st0.px) / st0.sw, dy = (e.clientY - st0.py) / st0.sh;
+    if (mode === 'move') {
+      it.x = Math.max(-0.05, Math.min(0.99, st0.x + dx));
+      it.y = Math.max(-0.05, Math.min(0.99, st0.y + dy));
+      d.style.left = (it.x * 100) + '%';
+      d.style.top = (it.y * 100) + '%';
+    } else if (mode === 'wd') {
+      it.w = Math.max(0.04, Math.min(1.2, st0.w + dx));
+      d.style.width = (it.w * 100) + '%';
+      liReflow(it);
+      const sp = d.querySelector('.tx'); if (sp) sp.textContent = it.lines.join('\n');
+    } else {                                   // 크기
+      const k = Math.max(0.15, 1 + (dx + dy) * 2.2);
+      if (it.kind === 'text') {
+        it.size = Math.max(0.004, Math.min(0.25, st0.size * k));
+        it.w = Math.max(0.04, Math.min(1.2, st0.w * k));
+        d.style.width = (it.w * 100) + '%';
+        liReflow(it);
+        const sp = d.querySelector('.tx');
+        if (sp) { sp.textContent = it.lines.join('\n'); sp.style.fontSize = (it.size * st0.sw) + 'px'; }
+      } else {
+        it.w = Math.max(0.02, Math.min(1.2, st0.w * k));
+        d.style.width = (it.w * 100) + '%';
+      }
+    }
+  };
+  const onUp = () => { if (mode) { mode = null; liRenderSel(); } };
+  d.addEventListener('pointerdown', onDown);
+  d.addEventListener('pointermove', onMove);
+  d.addEventListener('pointerup', onUp);
+  d.addEventListener('pointercancel', onUp);
+}
+
+function liSelect(id) {
+  liSelId = id;
+  document.querySelectorAll('#liStage .li-it').forEach(d => {
+    d.classList.toggle('sel', d.dataset.id === id);
+  });
+  liRenderSel();
+}
+
+/* ---------------- 얹기 버튼 ---------------- */
+function liChipList() {
+  const L = [];
+  if (liSet.name) L.push({ k: 'name', label: '이름', text: liSet.name });
+  if (liSet.org)  L.push({ k: 'org',  label: '소속', text: liSet.org });
+  if (liSet.rank) L.push({ k: 'rank', label: '직책', text: liSet.rank });
+  if (liSet.tel)  L.push({ k: 'tel',  label: '연락처', text: liSet.tel });
+  if (liSet.sign)  L.push({ k: 'sign',  label: '자필 서명', img: liSet.sign });
+  if (liSet.stamp) L.push({ k: 'stamp', label: '도장', img: liSet.stamp });
+  liSet.phrases.forEach((t, i) => {
+    if (!t.trim()) return;
+    L.push({ k: 'ph' + i, label: (i + 1) + '. ' + t.slice(0, 12) + (t.length > 12 ? '…' : ''), text: t });
+  });
+  return L;
+}
+function liRenderChips() {
+  const box = document.getElementById('liAddChips');
+  box.innerHTML = liChipList().map((c, i) =>
+    `<button onclick="liAdd(${i})">${esc(c.label)}</button>`).join('') +
+    '<button onclick="liAddFree()" style="border-color:#1F4E79;color:#1F4E79;font-weight:700">+ 텍스트</button>';
+}
+
+function liNewPos() {
+  const pg = liPage();
+  const n = pg.items.length;
+  return { x: 0.08 + (n % 5) * 0.02, y: 0.10 + (n % 8) * 0.035 };
+}
+function liAdd(i) {
+  const c = liChipList()[i];
+  if (!c) return;
+  if (c.img) liPush({ kind: 'img', src: c.k, data: c.img, w: 0.16 });
+  else liPush({ kind: 'text', src: c.k, text: c.text, w: c.k.startsWith('ph') ? 0.62 : 0.22 });
+}
+function liAddFree() { liPush({ kind: 'text', src: 'free', text: '내용을 입력하세요', w: 0.35 }); }
+
+function liPush(base) {
+  const pg = liPage();
+  const p = liNewPos();
+  const it = Object.assign({
+    id: 'i' + (++liSeq), x: p.x, y: p.y, w: 0.3,
+    size: 0.019, color: '#000000', bold: false,
+  }, base);
+  if (it.kind === 'text') liReflowFor(it, pg);
+  pg.items.push(it);
+  document.getElementById('liStage').appendChild(liItemEl(it));
+  liSelect(it.id);
+  liFixFontSizes();
+}
+function liReflowFor(it, pg) { it.lines = liWrap(it.text, it.size * pg.w, it.w * pg.w, it.bold); }
+
+/* ---------------- 선택한 항목 조절 ---------------- */
+function liSel() {
+  const pg = liPage();
+  return pg && pg.items.find(x => x.id === liSelId);
+}
+function liRenderSel() {
+  const card = document.getElementById('liSelCard');
+  const box = document.getElementById('liSelBox');
+  const it = liSel();
+  if (!it) { card.style.display = 'none'; box.innerHTML = ''; return; }
+  card.style.display = 'block';
+  const isText = it.kind === 'text';
+  box.innerHTML = `
+    ${isText ? `<label style="margin-top:0">글 내용</label>
+      <textarea id="liSelText" oninput="liSetText(this.value)">${esc(it.text)}</textarea>` : ''}
+    <label>크기</label>
+    <div class="row">
+      <button class="btn w sm" style="flex:1" onclick="liNudge('size',-1)">작게 −</button>
+      <button class="btn w sm" style="flex:1" onclick="liNudge('size',1)">크게 ＋</button>
+    </div>
+    ${isText ? `<label>글 칸 너비</label>
+      <div class="row">
+        <button class="btn w sm" style="flex:1" onclick="liNudge('w',-1)">좁게 −</button>
+        <button class="btn w sm" style="flex:1" onclick="liNudge('w',1)">넓게 ＋</button>
+      </div>
+      <label>색</label>
+      <div class="chips">${LI_COLORS.map(([n, c]) =>
+        `<button class="${it.color === c ? 'on' : ''}" onclick="liSetColor('${c}')">${n}</button>`).join('')}</div>
+      <label>굵기</label>
+      <div class="chips">
+        <button class="${it.bold ? '' : 'on'}" onclick="liSetBold(false)">보통</button>
+        <button class="${it.bold ? 'on' : ''}" onclick="liSetBold(true)">굵게</button>
+      </div>` : ''}
+    <div style="margin-top:13px"><button class="btn w full sm" style="color:#B23A3A;border-color:#E2BFBF"
+      onclick="liDelSel()">이 항목 지우기</button></div>`;
+}
+function liSetText(v) {
+  const it = liSel(); if (!it) return;
+  it.text = v; liReflow(it);
+  const d = document.querySelector(`#liStage .li-it[data-id="${it.id}"] .tx`);
+  if (d) d.textContent = it.lines.join('\n');
+}
+function liNudge(what, dir) {
+  const it = liSel(); if (!it) return;
+  const k = dir > 0 ? 1.12 : 1 / 1.12;
+  if (what === 'size') {
+    it.size = Math.max(0.004, Math.min(0.25, it.size * k));
+    if (it.kind !== 'text') it.w = Math.max(0.02, Math.min(1.2, it.w * k));
+  } else {
+    it.w = Math.max(0.04, Math.min(1.2, it.w * k));
+  }
+  if (it.kind === 'text') liReflow(it);
+  liRedrawItem(it);
+}
+function liSetColor(c) { const it = liSel(); if (!it) return; it.color = c; liRedrawItem(it); liRenderSel(); }
+function liSetBold(v) {
+  const it = liSel(); if (!it) return;
+  it.bold = !!v; liReflow(it); liRedrawItem(it); liRenderSel();
+}
+function liRedrawItem(it) {
+  const old = document.querySelector(`#liStage .li-it[data-id="${it.id}"]`);
+  if (!old) return;
+  const fresh = liItemEl(it);
+  old.replaceWith(fresh);
+  liFixFontSizes();
+}
+function liDelSel() {
+  const pg = liPage(), it = liSel();
+  if (!it) return;
+  pg.items = pg.items.filter(x => x.id !== it.id);
+  liSelId = null;
+  liRenderStage(); liFixFontSizes(); liRenderSel();
+}
+
+/* ---------------- 배치 기억 ---------------- */
+function liLayoutSave() {
+  const pg = liPage(); if (!pg) return;
+  const keep = pg.items.map(it => ({
+    kind: it.kind, src: it.src, text: it.kind === 'text' ? it.text : '',
+    x: it.x, y: it.y, w: it.w, size: it.size, color: it.color, bold: !!it.bold,
+  }));
+  lsSet('liLayout', JSON.stringify(keep));
+}
+function liLayoutLoad() {
+  let keep = [];
+  try { keep = JSON.parse(lsGet('liLayout') || '[]'); } catch (e) { keep = []; }
+  if (!keep.length) { show('err', '기억해 둔 배치가 없습니다. 한 번 저장하면 기억합니다.', 4000); return; }
+  const pg = liPage();
+  for (const k of keep) {
+    const it = Object.assign({ id: 'i' + (++liSeq) }, k);
+    if (it.kind === 'img') {
+      it.data = it.src === 'sign' ? liSet.sign : liSet.stamp;
+      if (!it.data) continue;
+    } else {
+      liReflowFor(it, pg);
+    }
+    pg.items.push(it);
+  }
+  liSelId = null;
+  liRenderStage(); liFixFontSizes(); liRenderSel();
+  show('ok', '지난 배치를 불러왔습니다.', 3000);
+}
+
+/* ---------------- 저장 ---------------- */
+/** 한 장을 원본 크기 캔버스에 그린다 */
+async function liFlatten(pg) {
+  const cv = document.createElement('canvas');
+  cv.width = pg.w; cv.height = pg.h;
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+  const base = await liLoadImage(pg.url);
+  cx.drawImage(base, 0, 0, cv.width, cv.height);
+  for (const it of pg.items) {
+    if (it.kind === 'text') {
+      const fs = it.size * pg.w;
+      cx.font = (it.bold ? '700 ' : '') + fs + 'px ' + LI_FONT;
+      cx.fillStyle = it.color;
+      cx.textBaseline = 'alphabetic';
+      const lines = it.lines || liWrap(it.text, fs, it.w * pg.w, it.bold);
+      const lh = fs * 1.35;
+      const m = cx.measureText('가');
+      const asc = m.fontBoundingBoxAscent || fs * 0.88;
+      const desc = m.fontBoundingBoxDescent || fs * 0.12;
+      const base = (lh - (asc + desc)) / 2 + asc;     // CSS 줄 상자와 같은 자리
+      lines.forEach((ln, i) => {
+        cx.fillText(ln, it.x * pg.w, it.y * pg.h + lh * i + base);
+      });
+    } else {
+      const im = await liLoadImage(it.data);
+      const w = it.w * pg.w, h = w * im.height / im.width;
+      cx.drawImage(im, it.x * pg.w, it.y * pg.h, w, h);
+    }
+  }
+  return cv;
+}
+
+function liOutName(ext) { return safeName(liDoc.name) + '_확인' + ext; }
+
+async function liSavePdf() {
+  if (!liDoc) return;
+  const btn = document.getElementById('actBtn');
+  btn.disabled = true; setStatus('PDF 만드는 중…');
+  try {
+    const pages = [];
+    for (const pg of liDoc.pages) {
+      const cv = await liFlatten(pg);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.88));
+      pages.push({ jpeg: new Uint8Array(await blob.arrayBuffer()),
+                   ptW: pg.ptW, ptH: pg.ptH, pxW: pg.w, pxH: pg.h });
+      cv.width = cv.height = 0;
+    }
+    liLayoutSave();
+    liDownload(new Blob([liBuildPdf(pages)], { type: 'application/pdf' }), liOutName('.pdf'));
+  } catch (e) {
+    console.error(e);
+    show('err', 'PDF를 만들지 못했습니다.<br>' + (e && e.message ? e.message : ''), 8000);
+  } finally { btn.disabled = false; setStatus('자동 저장됨'); }
+}
+
+async function liSaveJpg() {
+  if (!liDoc) return;
+  setStatus('이미지 만드는 중…');
+  try {
+    for (let i = 0; i < liDoc.pages.length; i++) {
+      const cv = await liFlatten(liDoc.pages[i]);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9));
+      const n = liDoc.pages.length > 1 ? `_${i + 1}` : '';
+      liDownload(blob, safeName(liDoc.name) + '_확인' + n + '.jpg');
+      cv.width = cv.height = 0;
+      await new Promise(r => setTimeout(r, 400));     // 연속 내려받기 사이 틈
+    }
+    liLayoutSave();
+  } catch (e) {
+    console.error(e);
+    show('err', '이미지를 만들지 못했습니다.', 8000);
+  } finally { setStatus('자동 저장됨'); }
+}
+
+function liDownload(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+  show('ok', `<b>${esc(name)}</b><br>저장했습니다. 휴대폰의 <b>다운로드</b> 폴더(아이폰은 “파일” 앱)에서 확인하세요.`, 9000);
+}
+
+/* ---------------- PDF 만들기 (그림 한 장 = 한 쪽) ---------------- */
+function liBuildPdf(pages) {
+  const enc = new TextEncoder();
+  const chunks = [];
+  let len = 0;
+  const put = d => { const u = typeof d === 'string' ? enc.encode(d) : d; chunks.push(u); len += u.length; };
+  const offs = [];
+  const obj = (n, body, bin) => {
+    offs[n] = len;
+    put(n + ' 0 obj\n'); put(body);
+    if (bin) { put('stream\n'); put(bin); put('\nendstream\n'); }
+    put('endobj\n');
+  };
+
+  put('%PDF-1.4\n');
+  put(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A]));
+
+  const N = pages.length;
+  const kids = pages.map((_, i) => `${3 + i * 3} 0 R`).join(' ');
+  obj(1, '<</Type/Catalog/Pages 2 0 R>>\n');
+  obj(2, `<</Type/Pages/Kids[${kids}]/Count ${N}>>\n`);
+
+  pages.forEach((p, i) => {
+    const pn = 3 + i * 3, cn = pn + 1, xn = pn + 2;
+    const W = Math.round(p.ptW * 100) / 100, H = Math.round(p.ptH * 100) / 100;
+    obj(pn, `<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${W} ${H}]` +
+            `/Resources<</XObject<</Im0 ${xn} 0 R>>/ProcSet[/PDF/ImageC]>>` +
+            `/Contents ${cn} 0 R>>\n`);
+    const cs = `q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q\n`;
+    obj(cn, `<</Length ${cs.length}>>\n`, enc.encode(cs));
+    obj(xn, `<</Type/XObject/Subtype/Image/Width ${p.pxW}/Height ${p.pxH}` +
+            `/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${p.jpeg.length}>>\n`,
+        p.jpeg);
+  });
+
+  const total = 2 + N * 3;
+  const xref = len;
+  let t = `xref\n0 ${total + 1}\n0000000000 65535 f \n`;
+  for (let n = 1; n <= total; n++) t += String(offs[n]).padStart(10, '0') + ' 00000 n \n';
+  t += `trailer\n<</Size ${total + 1}/Root 1 0 R>>\nstartxref\n${xref}\n%%EOF\n`;
+  put(t);
+
+  const out = new Uint8Array(len);
+  let o = 0;
+  for (const c of chunks) { out.set(c, o); o += c.length; }
+  return out;
+}
+
+window.addEventListener('resize', () => { if (screen === 'lidoc') liFixFontSizes(); });
+
+
 /* ---------------- 시작 ---------------- */
 (async function init() {
   // 저장소가 느리거나 막혀 있어도 화면은 곧바로 뜨게 한다
@@ -2598,6 +3678,7 @@ async function auMakeExcel() {
     await mkRestore();
     await mhRestore();
     await auLoadIndex();
+    await liLoadSet();
     paint();                       // 불러온 내용으로 다시 그린다
   } catch (e) {
     console.error(e);
