@@ -132,14 +132,20 @@ input[type=file]{display:none}
 #liStage{position:relative;margin:0 auto;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.28);line-height:0}
 #liStage>img{display:block;width:100%;height:auto}
 .li-it{position:absolute;box-sizing:border-box;touch-action:none;cursor:move}
+.li-it::before{content:'';position:absolute;left:-11px;top:-11px;right:-11px;bottom:-11px}
 .li-it .tx{white-space:pre;line-height:1.35;display:block}
 .li-it img{display:block;width:100%;height:auto;pointer-events:none}
 .li-it.sel{outline:2px dashed #1F4E79;outline-offset:2px}
-.li-it .h{position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid #fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.35);touch-action:none;display:none}
+.li-it .h{position:absolute;width:34px;height:34px;border-radius:50%;border:2px solid #fff;
+  box-shadow:0 1px 5px rgba(0,0,0,.35);touch-action:none;display:none}
 .li-it.sel .h{display:block}
-.li-it .h.sz{right:-15px;bottom:-15px;background:#1F4E79}
-.li-it .h.wd{right:-15px;top:50%;margin-top:-15px;background:#D9822B}
+/* 손잡이 두 개. 겹치지 않게 한쪽은 오른쪽 가운데, 한쪽은 아래 가운데에 둔다 */
+.li-it .h::before{content:'';position:absolute;left:-7px;top:-7px;width:48px;height:48px}
+.li-it .h span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:15px;font-weight:800;line-height:1;pointer-events:none}
+.li-it .h.wd{right:-20px;top:50%;margin-top:-17px;background:#D9822B}      /* 네모 칸 너비 */
+.li-it .h.sz{right:-18px;bottom:-18px;background:#1F4E79}                  /* 그림 크기 */
+.li-it.txt .h.sz{right:auto;left:-20px;bottom:-20px}                       /* 글자 크기 */
 .li-pg{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .li-pg .btn{white-space:nowrap}
 .li-pg .zm{flex:1 0 100%;max-width:420px;margin:0 auto}
@@ -151,6 +157,21 @@ input[type=file]{display:none}
 .li-ph{border:1px solid #E0E7EE;border-radius:9px;padding:11px 12px;margin-top:9px}
 .li-ph textarea{min-height:66px;font-size:14px}
 .li-ph .ops{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+
+.li-pin{position:absolute;width:0;height:0;pointer-events:none;z-index:6}
+.li-pin i{position:absolute;display:block;background:#D9822B}
+.li-pin .h{left:-16px;top:-1.5px;width:32px;height:3px}
+.li-pin .v{top:-16px;left:-1.5px;width:3px;height:32px}
+.li-pin .o{left:-11px;top:-11px;width:22px;height:22px;background:transparent;
+  border:3px solid #D9822B;border-radius:50%}
+.chips button.used{background:#1F4E79;border-color:#1F4E79;color:#fff;font-weight:700}
+.li-tip{background:#FFF6DC;border:1px solid #E4C76A;border-radius:9px;padding:11px 13px;
+  font-size:12.5px;color:#5C4708;line-height:1.6;margin-bottom:11px}
+.li-tip b{color:#3F3105}
+.li-ph-pick{display:flex;gap:8px;margin-top:8px}
+.li-ph-pick select{flex:1;min-width:0}
+.card h2.fold{cursor:pointer;user-select:none}
+.card h2 .ar{margin-left:auto;color:#8798A6;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -410,9 +431,15 @@ input[type=file]{display:none}
     </div>
 
     <div class="card">
-      <h2><span class="n">3</span> 자주 쓰는 문구</h2>
-      <div id="liPhrases"></div>
-      <button class="btn w full sm" style="margin-top:11px" onclick="liPhraseAdd()">+ 문구 추가</button>
+      <h2 class="fold" onclick="liFold('liPhraseBox')">
+        <span class="n">3</span> 자주 쓰는 문구
+        <span class="cnt" id="liPhraseCnt"></span>
+        <span class="ar" id="liPhraseBoxAr">▼ 펼치기</span>
+      </h2>
+      <div id="liPhraseBox" style="display:none">
+        <div id="liPhrases"></div>
+        <button class="btn w full sm" style="margin-top:11px" onclick="liPhraseAdd()">+ 문구 추가</button>
+      </div>
     </div>
 
     <div class="card">
@@ -429,14 +456,20 @@ input[type=file]{display:none}
 
   <!-- ===================== 유관기관협의 : 문서 편집 ===================== -->
   <section id="scr-lidoc" hidden>
+    <div id="liHwpNote"></div>
     <div class="li-pg" id="liPager"></div>
     <div class="listage"><div id="liStage"></div></div>
 
     <div class="card" style="margin-top:13px">
       <h2>문서에 얹기</h2>
+      <div class="li-tip" id="liPinTip"></div>
       <div class="chips" id="liAddChips"></div>
-      <div class="hint">얹은 뒤에는 손가락으로 끌어서 옮기고, 파란 동그라미로 크기를,
-        주황 동그라미로 글 칸 너비를 조절합니다.</div>
+      <div id="liPhrasePick"></div>
+      <div id="liPlaced"></div>
+      <div class="hint">넣은 뒤에는 <b>손가락으로 끌어서</b> 자리를 잡습니다.
+        고르면 동그라미 두 개가 나옵니다 —
+        <b style="color:#D9822B">↔ 주황(오른쪽)</b>은 네모 칸 너비,
+        <b style="color:#1F4E79">가 파랑(왼쪽 아래)</b>은 글자 크기입니다.</div>
     </div>
 
     <div class="card" id="liSelCard" style="display:none">
@@ -2733,6 +2766,7 @@ let liSet = { name: '', org: '', rank: '', tel: '', sign: '', stamp: '',
 let liDoc = null;          // { name, pages:[{url,w,h,ptW,ptH,items:[]}], cur }
 let liSelId = null;
 let liSeq = 0;
+let liPin = null;          // 문서에서 찍어 둔 자리 {x,y}
 
 /* ---------------- 설정 읽고 쓰기 ---------------- */
 async function liLoadSet() {
@@ -2895,7 +2929,18 @@ async function liSignSave() {
 }
 
 /* ---------------- 3. 자주 쓰는 문구 ---------------- */
+/** 카드 내용을 접었다 폈다 */
+function liFold(id, open) {
+  const b = document.getElementById(id), a = document.getElementById(id + 'Ar');
+  if (!b) return;
+  const show = open != null ? open : b.style.display === 'none';
+  b.style.display = show ? 'block' : 'none';
+  if (a) a.textContent = show ? '▲ 접기' : '▼ 펼치기';
+}
+
 function liRenderPhrases() {
+  const cnt = document.getElementById('liPhraseCnt');
+  if (cnt) cnt.textContent = liSet.phrases.filter(t => t.trim()).length + '개';
   const box = document.getElementById('liPhrases');
   box.innerHTML = liSet.phrases.map((t, i) => `
     <div class="li-ph">
@@ -2907,7 +2952,7 @@ function liRenderPhrases() {
 }
 function liPhraseEdit(i, v) { liSet.phrases[i] = v; liSaveSet(); }
 function liPhraseDel(i) { liSet.phrases.splice(i, 1); liSaveSet(); liRenderPhrases(); }
-function liPhraseAdd() { liSet.phrases.push(''); liSaveSet(); liRenderPhrases(); }
+function liPhraseAdd() { liSet.phrases.push(''); liSaveSet(); liRenderPhrases(); liFold('liPhraseBox', true); }
 
 function liRenderSetup() { liRenderInfo(); liRenderSign(); liRenderPhrases(); liRenderDocInfo(); }
 function liRenderDocInfo() {
@@ -2954,12 +2999,10 @@ async function liDocChosen(ev) {
       }
     }
     if (!pages.length) { show('err', '한글·PDF·이미지 파일을 골라 주세요.', 5000); return; }
-    liDoc = { name: files[0].name.replace(/\.[^.]+$/, ''), pages, cur: 0 };
-    liSelId = null;
+    liDoc = { name: files[0].name.replace(/\.[^.]+$/, ''), pages, cur: 0, fromHwp: hwp };
+    liSelId = null; liPin = null;
     show('', '');
     go('lidoc');
-    if (hwp) show('warn', '한글 파일은 <b>첫 장</b>만 들어옵니다. ' +
-      '여러 장이거나 더 또렷해야 하면 한글에서 <b>PDF로 저장</b>해 올려 주세요.', 9000);
   } catch (e) {
     console.error(e);
     show('err', '자료를 읽지 못했습니다.<br>' + (e && e.message ? e.message : ''), 9000);
@@ -3190,7 +3233,35 @@ function liRenderDoc() {
   liRenderPager();
   liRenderStage();
   liRenderChips();
-  liRenderSel();
+  liRenderSel(true);
+  liRenderPinTip();
+  liRenderPlaced();
+  liRenderHwpNote();
+}
+
+/** 한글 파일로 열었을 때 2장 넘어가는 경우 안내 */
+function liRenderHwpNote() {
+  const el = document.getElementById('liHwpNote');
+  if (!el) return;
+  if (!liDoc || !liDoc.fromHwp) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="msg warn" style="margin-bottom:12px">
+      한글 파일은 <b>첫 장만</b> 들어옵니다. 한글이 파일 안에 첫 장 화면만 넣어 두기 때문입니다.<br>
+      <b>회신란이 2장에 있으면</b> 아래 방법으로 PDF로 바꿔 다시 올려 주세요.
+      <button class="btn w sm" style="margin-top:9px" onclick="liHwpHow()">PDF로 바꾸는 법</button>
+      <div id="liHwpHow" style="display:none;margin-top:10px;line-height:1.75">
+        <b>폰에서</b><br>
+        한글 파일을 한컴오피스 앱으로 열기 → 메뉴 → <b>인쇄</b> →
+        프린터를 <b>PDF로 저장</b>으로 → 저장 → 이 앱에 그 PDF 올리기<br><br>
+        <b>PC에서</b><br>
+        한글로 열기 → <b>파일 → 다른 이름으로 저장</b> → 파일 형식 <b>PDF</b> → 저장<br><br>
+        PDF로 올리면 <b>모든 장</b>이 들어오고 페이지도 넘길 수 있습니다.
+      </div>
+    </div>`;
+}
+function liHwpHow() {
+  const d = document.getElementById('liHwpHow');
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
 }
 
 let liZoom = 1;
@@ -3218,7 +3289,7 @@ function liSetZoom(i) {
 function liGoPage(d) {
   const n = liDoc.cur + d;
   if (n < 0 || n >= liDoc.pages.length) return;
-  liDoc.cur = n; liSelId = null;
+  liDoc.cur = n; liSelId = null; liPin = null;
   liRenderDoc();
 }
 
@@ -3231,11 +3302,35 @@ function liRenderStage() {
   st.style.maxWidth = liZoom > 1 ? 'none' : '100%';
   if (!st._wired) {
     st._wired = true;
-    st.addEventListener('pointerdown', e => {          // 빈 곳을 누르면 선택 해제
-      if (e.target === st || e.target.tagName === 'IMG') liSelect(null);
+    st.addEventListener('pointerdown', e => {          // 빈 곳을 누르면 그 자리를 찍는다
+      if (e.target !== st && e.target.tagName !== 'IMG') return;
+      const r = st.getBoundingClientRect();
+      liPin = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+      liSelId = null;
+      liRenderStage(); liFixFontSizes(); liRenderSel(true); liRenderPinTip(); liRenderPlaced();
     });
   }
   for (const it of pg.items) st.appendChild(liItemEl(it));
+  if (liPin) {
+    const p = document.createElement('div');
+    p.className = 'li-pin';
+    p.style.left = (liPin.x * 100) + '%';
+    p.style.top = (liPin.y * 100) + '%';
+    p.innerHTML = '<i class="h"></i><i class="v"></i><i class="o"></i>';
+    st.appendChild(p);
+  }
+}
+
+/** 지금 어디에 넣을지 알려 준다 */
+function liRenderPinTip() {
+  const el = document.getElementById('liPinTip');
+  if (!el) return;
+  el.innerHTML = liPin
+    ? '넣을 자리를 찍었습니다. 아래에서 <b>넣을 것</b>을 고르세요.'
+    : '① 문서에서 <b>넣을 자리를 한 번 누르세요.</b> ② 그다음 아래에서 고르면 그 자리에 들어갑니다.';
+  el.style.background = liPin ? '#EAF6EC' : '#FFF6DC';
+  el.style.borderColor = liPin ? '#A8D3B0' : '#E4C76A';
+  el.style.color = liPin ? '#2C6B2F' : '#5C4708';
 }
 
 /* 글줄을 미리 나눠 둔다 — 화면과 저장본이 똑같이 나오게 */
@@ -3272,7 +3367,7 @@ function liReflow(it) {
 function liItemEl(it) {
   const pg = liPage();
   const d = document.createElement('div');
-  d.className = 'li-it' + (it.id === liSelId ? ' sel' : '');
+  d.className = 'li-it' + (it.kind === 'text' ? ' txt' : '') + (it.id === liSelId ? ' sel' : '');
   d.dataset.id = it.id;
   d.style.left = (it.x * 100) + '%';
   d.style.top = (it.y * 100) + '%';
@@ -3294,9 +3389,11 @@ function liItemEl(it) {
     d.appendChild(im);
   }
   const h1 = document.createElement('div'); h1.className = 'h sz'; h1.dataset.h = 'sz';
+  h1.innerHTML = it.kind === 'text' ? '<span>가</span>' : '<span>⤡</span>';
   d.appendChild(h1);
   if (it.kind === 'text') {
     const h2 = document.createElement('div'); h2.className = 'h wd'; h2.dataset.h = 'wd';
+    h2.innerHTML = '<span>↔</span>';
     d.appendChild(h2);
   }
   liWireItem(d, it);
@@ -3339,24 +3436,22 @@ function liWireItem(d, it) {
       it.y = Math.max(-0.05, Math.min(0.99, st0.y + dy));
       d.style.left = (it.x * 100) + '%';
       d.style.top = (it.y * 100) + '%';
-    } else if (mode === 'wd') {
-      it.w = Math.max(0.04, Math.min(1.2, st0.w + dx));
+    } else if (mode === 'wd') {                // 네모 칸 너비 (가로로 끌기)
+      it.w = Math.max(0.03, Math.min(1.2, st0.w + dx));
       d.style.width = (it.w * 100) + '%';
       liReflow(it);
-      const sp = d.querySelector('.tx'); if (sp) sp.textContent = it.lines.join('\n');
-    } else {                                   // 크기
+      const sp = d.querySelector('.tx');
+      if (sp) sp.textContent = it.lines.join('\n');
+    } else if (it.kind === 'text') {           // 글자 크기 (아래로 끌면 커진다)
+      const k = Math.max(0.15, 1 + dy * 3.2);
+      it.size = Math.max(0.004, Math.min(0.25, st0.size * k));
+      liReflow(it);
+      const sp = d.querySelector('.tx');
+      if (sp) { sp.textContent = it.lines.join('\n'); sp.style.fontSize = (it.size * st0.sw) + 'px'; }
+    } else {                                   // 그림 크기
       const k = Math.max(0.15, 1 + (dx + dy) * 2.2);
-      if (it.kind === 'text') {
-        it.size = Math.max(0.004, Math.min(0.25, st0.size * k));
-        it.w = Math.max(0.04, Math.min(1.2, st0.w * k));
-        d.style.width = (it.w * 100) + '%';
-        liReflow(it);
-        const sp = d.querySelector('.tx');
-        if (sp) { sp.textContent = it.lines.join('\n'); sp.style.fontSize = (it.size * st0.sw) + 'px'; }
-      } else {
-        it.w = Math.max(0.02, Math.min(1.2, st0.w * k));
-        d.style.width = (it.w * 100) + '%';
-      }
+      it.w = Math.max(0.02, Math.min(1.2, st0.w * k));
+      d.style.width = (it.w * 100) + '%';
     }
   };
   const onUp = () => { if (mode) { mode = null; liRenderSel(); } };
@@ -3366,12 +3461,39 @@ function liWireItem(d, it) {
   d.addEventListener('pointercancel', onUp);
 }
 
-function liSelect(id) {
+function liSelect(id, focusText) {
   liSelId = id;
   document.querySelectorAll('#liStage .li-it').forEach(d => {
     d.classList.toggle('sel', d.dataset.id === id);
   });
-  liRenderSel();
+  liRenderSel(true);
+  liRenderPlaced();
+  if (!id) return;
+  // 항목을 누를 때 화면을 옮기지 않는다 (끌어 옮기는 중에 화면이 튀었다)
+  if (focusText) {
+    const ta = document.getElementById('liSelText');
+    if (ta) { ta.focus(); ta.select(); }       // 바로 쳐서 바꿀 수 있게
+  }
+}
+
+/** 이 장에 얹은 것 목록 — 문서에서 작아서 누르기 힘든 것도 여기서 고른다 */
+function liRenderPlaced() {
+  const el = document.getElementById('liPlaced');
+  if (!el) return;
+  const pg = liPage();
+  const items = (pg && pg.items) || [];
+  if (!items.length) { el.innerHTML = ''; return; }
+  const name = it => {
+    if (it.kind === 'img') return it.src === 'sign' ? '자필 서명' : '도장';
+    if (it.src === 'free') return (it.text || '').trim().slice(0, 10) || '(빈 텍스트)';
+    if (it.src.startsWith('ph')) return '문구 ' + (Number(it.src.slice(2)) + 1);
+    return { name: '이름', org: '소속', rank: '직책', tel: '연락처' }[it.src] || '텍스트';
+  };
+  el.innerHTML = `<label style="margin-top:14px">이 장에 얹은 것 <span class="cnt">${items.length}개</span></label>
+    <div class="chips">${items.map(it =>
+      `<button class="${it.id === liSelId ? 'on' : ''}" onclick="liSelect('${it.id}')">${esc(name(it))}</button>`
+    ).join('')}</div>
+    <div class="hint">누르면 그 항목이 선택됩니다. 글을 고치거나 크기를 바꿀 때 쓰세요.</div>`;
 }
 
 /* ---------------- 얹기 버튼 ---------------- */
@@ -3383,45 +3505,89 @@ function liChipList() {
   if (liSet.tel)  L.push({ k: 'tel',  label: '연락처', text: liSet.tel });
   if (liSet.sign)  L.push({ k: 'sign',  label: '자필 서명', img: liSet.sign });
   if (liSet.stamp) L.push({ k: 'stamp', label: '도장', img: liSet.stamp });
-  liSet.phrases.forEach((t, i) => {
-    if (!t.trim()) return;
-    L.push({ k: 'ph' + i, label: (i + 1) + '. ' + t.slice(0, 12) + (t.length > 12 ? '…' : ''), text: t });
-  });
   return L;
+}
+/** 이 장에 이미 넣은 것인지 */
+function liUsed(key) {
+  const pg = liPage();
+  return !!(pg && pg.items.some(x => x.src === key));
 }
 function liRenderChips() {
   const box = document.getElementById('liAddChips');
-  box.innerHTML = liChipList().map((c, i) =>
-    `<button onclick="liAdd(${i})">${esc(c.label)}</button>`).join('') +
-    '<button onclick="liAddFree()" style="border-color:#1F4E79;color:#1F4E79;font-weight:700">+ 텍스트</button>';
+  if (box) {
+    box.innerHTML = liChipList().map((c, i) =>
+      `<button class="${liUsed(c.k) ? 'used' : ''}" onclick="liAdd(${i})">${
+        liUsed(c.k) ? '✓ ' : ''}${esc(c.label)}</button>`).join('') +
+      '<button onclick="liAddFree()" style="border-color:#1F4E79;color:#1F4E79;font-weight:700">+ 텍스트</button>';
+  }
+  const pick = document.getElementById('liPhrasePick');
+  if (!pick) return;
+  const list = liSet.phrases.map((t, i) => ({ t, i })).filter(x => x.t.trim());
+  if (!list.length) { pick.innerHTML = ''; return; }
+  if (liPhraseSel == null || liPhraseSel >= liSet.phrases.length) liPhraseSel = list[0].i;
+  pick.innerHTML = `
+    <label style="margin-top:14px">자주 쓰는 문구</label>
+    <div class="li-ph-pick">
+      <select id="liPhraseSel" onchange="liPhraseSel=+this.value">
+        ${list.map(x => `<option value="${x.i}"${x.i === liPhraseSel ? ' selected' : ''}>${
+          liUsed('ph' + x.i) ? '✓ ' : ''}${x.i + 1}. ${esc(x.t.slice(0, 22))}${x.t.length > 22 ? '…' : ''}</option>`).join('')}
+      </select>
+      <button class="btn" style="padding:12px 18px" onclick="liAddPhrase()">넣기</button>
+    </div>
+    <div class="hint">고른 문구가 찍어 둔 자리에 들어갑니다. 내용은 <b>유관기관협의 첫 화면</b>에서 고칠 수 있습니다.</div>`;
 }
 
-function liNewPos() {
-  const pg = liPage();
-  const n = pg.items.length;
-  return { x: 0.08 + (n % 5) * 0.02, y: 0.10 + (n % 8) * 0.035 };
-}
+let liPhraseSel = null;
+
 function liAdd(i) {
   const c = liChipList()[i];
   if (!c) return;
-  if (c.img) liPush({ kind: 'img', src: c.k, data: c.img, w: 0.16 });
-  else liPush({ kind: 'text', src: c.k, text: c.text, w: c.k.startsWith('ph') ? 0.62 : 0.22 });
+  if (c.img) liPlace({ kind: 'img', src: c.k, data: c.img, w: 0.16 });
+  else liPlace({ kind: 'text', src: c.k, text: c.text, w: 0.22 });
 }
-function liAddFree() { liPush({ kind: 'text', src: 'free', text: '내용을 입력하세요', w: 0.35 }); }
+function liAddFree() { liPlace({ kind: 'text', src: 'free', text: '내용을 입력하세요', w: 0.35 }); }
+function liAddPhrase() {
+  const t = liSet.phrases[liPhraseSel];
+  if (!t || !t.trim()) { show('err', '넣을 문구를 고르세요.', 2500); return; }
+  liPlace({ kind: 'text', src: 'ph' + liPhraseSel, text: t, w: 0.62, size: 0.015 });
+}
 
-function liPush(base) {
+/** 찍어 둔 자리에 얹는다 */
+async function liPlace(base) {
   const pg = liPage();
-  const p = liNewPos();
+  if (!pg) return;
+  if (!liPin) {
+    show('err', '문서에서 <b>넣을 자리를 먼저 눌러</b> 주세요.', 3500);
+    return;
+  }
   const it = Object.assign({
-    id: 'i' + (++liSeq), x: p.x, y: p.y, w: 0.3,
+    id: 'i' + (++liSeq), x: 0, y: 0, w: 0.3,
     size: 0.019, color: '#000000', bold: false,
   }, base);
-  if (it.kind === 'text') liReflowFor(it, pg);
+
+  if (it.kind === 'text') {
+    liReflowFor(it, pg);
+    const hPx = it.lines.length * it.size * pg.w * 1.35;
+    it.x = liPin.x;
+    it.y = liPin.y - (hPx / 2) / pg.h;
+  } else {
+    let ratio = 0.4;
+    try { const im = await liLoadImage(it.data); ratio = im.height / im.width; } catch (e) { /* 기본값 */ }
+    const hPx = it.w * pg.w * ratio;
+    it.x = liPin.x - it.w / 2;
+    it.y = liPin.y - (hPx / 2) / pg.h;
+  }
+  it.x = Math.max(0, Math.min(0.99, it.x));
+  it.y = Math.max(0, Math.min(0.99, it.y));
+
   pg.items.push(it);
-  document.getElementById('liStage').appendChild(liItemEl(it));
-  liSelect(it.id);
-  liFixFontSizes();
+  liPin = null;
+  liRenderStage(); liFixFontSizes();
+  liRenderChips(); liRenderPinTip();
+  liSelect(it.id, it.src === 'free');     // 새 텍스트는 바로 칠 수 있게
 }
+
+
 function liReflowFor(it, pg) { it.lines = liWrap(it.text, it.size * pg.w, it.w * pg.w, it.bold); }
 
 /* ---------------- 선택한 항목 조절 ---------------- */
@@ -3429,26 +3595,32 @@ function liSel() {
   const pg = liPage();
   return pg && pg.items.find(x => x.id === liSelId);
 }
-function liRenderSel() {
+let liSelShown = null;
+function liRenderSel(force) {
   const card = document.getElementById('liSelCard');
   const box = document.getElementById('liSelBox');
   const it = liSel();
-  if (!it) { card.style.display = 'none'; box.innerHTML = ''; return; }
+  if (!it) { card.style.display = 'none'; box.innerHTML = ''; liSelShown = null; return; }
+  // 글을 쓰고 있는 중이면 화면을 다시 만들지 않는다 (커서가 튀고 글이 끊긴다)
+  const ta = document.getElementById('liSelText');
+  if (!force && liSelShown === it.id && ta && document.activeElement === ta) return;
+  liSelShown = it.id;
   card.style.display = 'block';
   const isText = it.kind === 'text';
   box.innerHTML = `
-    ${isText ? `<label style="margin-top:0">글 내용</label>
+    ${isText ? `<label style="margin-top:0">글 내용 <span class="cnt">여기서 고칩니다</span></label>
       <textarea id="liSelText" oninput="liSetText(this.value)">${esc(it.text)}</textarea>` : ''}
-    <label>크기</label>
+    <label${isText ? '' : " style=\"margin-top:0\""}>${isText ? '글자 크기 <span class="cnt">가</span>' : '크기'}</label>
     <div class="row">
       <button class="btn w sm" style="flex:1" onclick="liNudge('size',-1)">작게 −</button>
       <button class="btn w sm" style="flex:1" onclick="liNudge('size',1)">크게 ＋</button>
     </div>
-    ${isText ? `<label>글 칸 너비</label>
+    ${isText ? `<label>네모 칸 너비 <span class="cnt">↔</span></label>
       <div class="row">
         <button class="btn w sm" style="flex:1" onclick="liNudge('w',-1)">좁게 −</button>
         <button class="btn w sm" style="flex:1" onclick="liNudge('w',1)">넓게 ＋</button>
       </div>
+      <div class="hint">칸을 좁히면 글이 아랫줄로 넘어가면서 네모 칸 높이가 따라 늘어납니다.</div>
       <label>색</label>
       <div class="chips">${LI_COLORS.map(([n, c]) =>
         `<button class="${it.color === c ? 'on' : ''}" onclick="liSetColor('${c}')">${n}</button>`).join('')}</div>
@@ -3465,23 +3637,25 @@ function liSetText(v) {
   it.text = v; liReflow(it);
   const d = document.querySelector(`#liStage .li-it[data-id="${it.id}"] .tx`);
   if (d) d.textContent = it.lines.join('\n');
+  clearTimeout(liSetText._t);
+  liSetText._t = setTimeout(liRenderPlaced, 400);     // 목록 이름도 맞춰 준다
 }
 function liNudge(what, dir) {
   const it = liSel(); if (!it) return;
   const k = dir > 0 ? 1.12 : 1 / 1.12;
   if (what === 'size') {
-    it.size = Math.max(0.004, Math.min(0.25, it.size * k));
-    if (it.kind !== 'text') it.w = Math.max(0.02, Math.min(1.2, it.w * k));
+    if (it.kind === 'text') it.size = Math.max(0.004, Math.min(0.25, it.size * k));
+    else it.w = Math.max(0.02, Math.min(1.2, it.w * k));
   } else {
-    it.w = Math.max(0.04, Math.min(1.2, it.w * k));
+    it.w = Math.max(0.03, Math.min(1.2, it.w * k));
   }
   if (it.kind === 'text') liReflow(it);
   liRedrawItem(it);
 }
-function liSetColor(c) { const it = liSel(); if (!it) return; it.color = c; liRedrawItem(it); liRenderSel(); }
+function liSetColor(c) { const it = liSel(); if (!it) return; it.color = c; liRedrawItem(it); liRenderSel(true); }
 function liSetBold(v) {
   const it = liSel(); if (!it) return;
-  it.bold = !!v; liReflow(it); liRedrawItem(it); liRenderSel();
+  it.bold = !!v; liReflow(it); liRedrawItem(it); liRenderSel(true);
 }
 function liRedrawItem(it) {
   const old = document.querySelector(`#liStage .li-it[data-id="${it.id}"]`);
@@ -3495,7 +3669,7 @@ function liDelSel() {
   if (!it) return;
   pg.items = pg.items.filter(x => x.id !== it.id);
   liSelId = null;
-  liRenderStage(); liFixFontSizes(); liRenderSel();
+  liRenderStage(); liFixFontSizes(); liRenderSel(true); liRenderChips(); liRenderPlaced();
 }
 
 /* ---------------- 배치 기억 ---------------- */
@@ -3523,7 +3697,7 @@ function liLayoutLoad() {
     pg.items.push(it);
   }
   liSelId = null;
-  liRenderStage(); liFixFontSizes(); liRenderSel();
+  liRenderStage(); liFixFontSizes(); liRenderSel(true); liRenderChips(); liRenderPlaced();
   show('ok', '지난 배치를 불러왔습니다.', 3000);
 }
 
