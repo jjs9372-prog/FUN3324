@@ -172,6 +172,40 @@ input[type=file]{display:none}
 .li-ph-pick select{flex:1;min-width:0}
 .card h2.fold{cursor:pointer;user-select:none}
 .card h2 .ar{margin-left:auto;color:#8798A6;font-size:12px;font-weight:700}
+
+.help h3{font-size:13.5px;color:#1F4E79;font-weight:800;margin:18px 0 8px;
+  display:flex;align-items:center;gap:8px}
+.help h3 .n{background:#1F4E79;color:#fff;border-radius:50%;width:22px;height:22px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:12px}
+.help h3 .n.a{background:#D9822B}
+.help p{font-size:13.5px;line-height:1.72;color:#3E5468;margin-bottom:7px}
+.help ul{margin:0 0 7px 17px}
+.help li{font-size:13.5px;line-height:1.72;color:#3E5468;margin-bottom:4px}
+.help b{color:#1F4E79}
+.help .q{font-size:13px;font-weight:800;color:#22303C;margin-top:12px}
+.help .a{font-size:13px;line-height:1.7;color:#5A6E82}
+.help .url{display:block;background:#EAF1F8;border-radius:8px;padding:11px 13px;
+  font-size:13px;font-weight:800;color:#1F4E79;word-break:break-all;margin:8px 0}
+
+/* ---- 위험개소 체크리스트 ---- */
+.rk-cat button{padding:15px 8px;font-size:15px;font-weight:700}
+.rk-crit label{display:flex;gap:11px;align-items:flex-start;padding:12px 13px;border:1px solid #DDE5ED;
+  border-radius:9px;margin:8px 0 0;font-size:14px;font-weight:400;color:#22303C;cursor:pointer;line-height:1.5}
+.rk-crit label.on{background:#FDF0F0;border-color:#E9B0B0}
+.rk-crit input{width:22px;height:22px;flex:none;margin-top:0;accent-color:#B23A3A}
+.rk-c4{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:#B23A3A;
+  border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.rk-g{display:inline-block;min-width:36px;text-align:center;font-weight:800;border-radius:6px;
+  padding:4px 8px;font-size:12.5px;flex:none}
+.rk-g.C1{background:#E2EFDA;color:#2C6B2F}.rk-g.C2{background:#FFF2CC;color:#7A5C00}
+.rk-g.C3{background:#FCE4D6;color:#9C4A12}.rk-g.C4{background:#FFC7CE;color:#9C0006}
+.rk-g.big{font-size:20px;padding:6px 16px;margin-right:10px}
+.rk-final-row{display:flex;align-items:center;gap:12px}
+.rk-final-row>b{font-size:14px;color:#1F4E79;flex:none}
+.rk-final-row>div{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.item .item-ed{flex:none;border:1px solid #B4C6DC;background:#fff;color:#1F4E79;border-radius:7px;
+  font-size:12px;padding:6px 10px;cursor:pointer;font-family:inherit}
+.item.rk-editing{border-color:#D9822B;background:#FFF8EE}
 </style>
 </head>
 <body>
@@ -191,7 +225,8 @@ input[type=file]{display:none}
   <!-- ===================== 홈 ===================== -->
   <section id="scr-home">
     <div class="jobs">
-      <button class="job" onclick="go('marker')">
+      <!-- 지중표시기 보강 : 잠시 꺼 둠. 다시 쓰려면 아래 hidden 만 지우면 된다 -->
+      <button class="job" onclick="go('marker')" hidden>
         <span class="ico">지</span>
         <span class="tx"><b>지중표시기 보강</b><span>현장 작업사진을 찍어 작업사진 양식으로 정리</span></span>
         <span class="go">›</span>
@@ -209,6 +244,11 @@ input[type=file]{display:none}
       <button class="job" onclick="go('liaison')">
         <span class="ico">협</span>
         <span class="tx"><b>유관기관협의</b><span>받은 자료에 이름·서명·문구를 얹어 회신본 만들기</span></span>
+        <span class="go">›</span>
+      </button>
+      <button class="job" onclick="go('risk')">
+        <span class="ico">위</span>
+        <span class="tx"><b>위험개소 체크리스트</b><span>맨홀·전주·국소 위험도를 평가해 엑셀 한 파일에 쌓기</span></span>
         <span class="go">›</span>
       </button>
     </div>
@@ -397,6 +437,12 @@ input[type=file]{display:none}
 
   <!-- ===================== 4. 유관기관협의 ===================== -->
   <section id="scr-liaison" hidden>
+    <div class="card" style="display:flex;align-items:center;gap:10px;padding:13px 16px">
+      <div style="flex:1;font-size:13px;color:#5A6E82;line-height:1.5">
+        처음이신가요? <b style="color:#1F4E79">쓰는 법</b>을 먼저 보세요.</div>
+      <button class="btn w sm" style="flex:none" onclick="go('lihelp')">쓰는 법 보기</button>
+    </div>
+
     <div class="card">
       <h2><span class="n">1</span> 내 정보</h2>
       <div id="liInfoView" style="display:none">
@@ -463,6 +509,105 @@ input[type=file]{display:none}
     </div>
   </section>
 
+
+  <!-- ===================== 유관기관협의 : 쓰는 법 ===================== -->
+  <section id="scr-lihelp" hidden>
+    <div class="card help">
+      <h2>이 앱이 하는 일</h2>
+      <p>기관에서 받은 <b>협의서(한글·PDF·사진)</b>를 올리면, 그 위에
+        <b>이름 · 서명 · 자주 쓰는 문구</b>를 얹어 회신본을 만들어 줍니다.
+        <b>SKT 관망도</b>도 뒤에 붙일 수 있습니다.</p>
+      <span class="url">https://jjs9372-prog.github.io/FUN3324/</span>
+      <p>이 주소를 <b>홈 화면에 추가</b>해 두면 앱처럼 바로 열립니다.
+        앱이 바뀌어도 같은 주소라 새로 받을 필요가 없습니다.</p>
+    </div>
+
+    <div class="card help">
+      <h2>처음 한 번만 하면 되는 것</h2>
+      <h3><span class="n">1</span> 내 정보</h3>
+      <p>이름만 필수입니다. 소속·직책·연락처는 공문에 적을 일이 있을 때만 넣으세요.
+        비워 두면 얹기 버튼에 나오지 않습니다.</p>
+      <h3><span class="n">2</span> 서명 · 도장</h3>
+      <p>손가락으로 한 번 <b>자필 서명</b>을 써 두거나, 가지고 계신
+        <b>도장 이미지</b>를 올리세요. 흰 배경은 자동으로 빼줍니다.</p>
+      <h3><span class="n">3</span> 자주 쓰는 문구</h3>
+      <p>기본 문구 4개가 들어 있습니다. 제목줄을 눌러 펼치면 내용을 고치거나
+        새 문구를 추가할 수 있습니다.</p>
+      <h3><span class="n">4</span> 관망도 범례</h3>
+      <p>범례 이미지를 올려 두면 관망도를 넣을 때 <b>사진 오른쪽 위</b>에 자동으로 올라갑니다.</p>
+    </div>
+
+    <div class="card help">
+      <h2>회신본 만들기</h2>
+      <h3><span class="n">5</span> 자료 올리기</h3>
+      <p><b>한글(.hwp) · PDF · 사진</b> 다 됩니다. 한글은 그대로 올리면 바로 열립니다.</p>
+      <div class="msg warn" style="margin:8px 0">한글 파일은 <b>첫 장만</b> 들어옵니다.
+        회신란이 2장에 있으면 한글 앱에서 <b>인쇄 → PDF로 저장</b>(PC는 다른 이름으로 저장 → PDF)
+        한 뒤 그 PDF를 올리세요. 그러면 모든 장이 들어옵니다.</div>
+
+      <h3><span class="n">6</span> 문서에 얹기</h3>
+      <ul>
+        <li>문서에서 <b>넣을 자리를 한 번 누릅니다</b> → 주황 조준점이 찍힙니다</li>
+        <li>아래에서 <b>이름 · 서명 · 도장 · 범례 · +텍스트</b>를 고르거나,
+          <b>자주 쓰는 문구</b>를 골라 <b>넣기</b></li>
+        <li>넣은 버튼은 <b>파랗게 ✓</b> 로 바뀝니다</li>
+      </ul>
+      <p>자리를 안 누르고 고르면 “넣을 자리를 먼저 눌러 주세요” 가 뜹니다.</p>
+
+      <h3><span class="n">7</span> 자리 · 크기 맞추기</h3>
+      <ul>
+        <li><b>옮기기</b> — 손가락으로 그냥 끕니다</li>
+        <li><b style="color:#D9822B">↔ 주황(오른쪽)</b> — 네모 칸 너비</li>
+        <li><b>가 파랑(왼쪽 아래)</b> — 글자 크기</li>
+        <li>표 칸에 맞출 때는 <b>너비 먼저, 글자 크기 나중</b></li>
+        <li>글자가 작아 누르기 어려우면 <b>이 장에 얹은 것</b> 목록에서 고르세요</li>
+      </ul>
+    </div>
+
+    <div class="card help">
+      <h2>SKT 관망도 · 저장</h2>
+      <h3><span class="n a">8</span> 관망도 넣기</h3>
+      <ul>
+        <li>사진을 고르면 <b>문서 맨 뒤에 새 장</b>이 생깁니다</li>
+        <li>위에 <b>SKT 관망도</b> 제목, 사진 오른쪽 위에 <b>범례</b>가 자동으로</li>
+        <li>가로로 긴 사진이면 <b>종이도 눕혀서</b> 만듭니다</li>
+        <li>여러 장 고르면 <b>한 장에 두 장씩</b> 들어갑니다</li>
+        <li>잘못 넣었으면 <b>이 관망도 장 지우기</b></li>
+      </ul>
+      <h3><span class="n a">9</span> 저장하기</h3>
+      <ul>
+        <li><b>PDF로 저장</b> — 여러 장이 한 파일로. 공문 회신에는 이쪽</li>
+        <li><b>이미지로 저장</b> — 장마다 그림 파일 하나씩</li>
+        <li>파일 이름은 올린 파일 이름 그대로 + <b>_확인</b></li>
+        <li>폰의 <b>다운로드</b> 폴더에 저장됩니다</li>
+        <li><b>지난 배치 불러오기</b> — 같은 양식을 또 받았을 때 지난번 배치를 그대로</li>
+      </ul>
+      <div class="msg ok" style="margin-top:10px">
+        <b>유관기관 폴더에 모으고 싶다면</b><br>
+        크롬 <b>설정 → 다운로드 → 저장 위치 확인</b>을 켜면 저장할 때마다 폴더를 고르게 됩니다.
+        거기서 유관기관 폴더를 고르거나 새로 만들면 됩니다.
+      </div>
+    </div>
+
+    <div class="card help">
+      <h2>이럴 땐 이렇게</h2>
+      <div class="q">회신란이 안 보여요</div>
+      <div class="a">한글 파일은 첫 장만 들어옵니다. 한글에서 PDF로 저장한 뒤 다시 올리세요.</div>
+      <div class="q">얹어지지가 않아요</div>
+      <div class="a">문서에서 넣을 자리를 먼저 한 번 눌러 조준점을 찍으세요.</div>
+      <div class="q">글자를 못 누르겠어요</div>
+      <div class="a">‘이 장에 얹은 것’ 목록에서 누르면 선택됩니다.</div>
+      <div class="q">작업하던 게 사라졌어요</div>
+      <div class="a">올린 자료는 앱을 새로 열면 지워집니다. 그날 건 그날 저장까지 끝내세요.</div>
+      <div class="q">글씨가 흐려요</div>
+      <div class="a">한글이 저장해 둔 화면이 작아서입니다. PDF로 바꿔 올리면 또렷합니다.</div>
+      <div class="q">파일 고르기에 한글 파일이 안 보여요</div>
+      <div class="a">“모든 파일” 또는 “내 파일”로 들어가서 고르세요.</div>
+      <div class="hint" style="margin-top:14px">찍은 사진과 만들어진 파일은 <b>이 기기 안에만</b> 저장됩니다.
+        서버로 전송되지 않습니다.</div>
+    </div>
+  </section>
+
   <!-- ===================== 유관기관협의 : 문서 편집 ===================== -->
   <section id="scr-lidoc" hidden>
     <div id="liHwpNote"></div>
@@ -502,6 +647,61 @@ input[type=file]{display:none}
       </div>
       <div class="hint">저장할 때 지금 배치를 기억해 둡니다. 같은 양식을 또 받으면
         <b>지난 배치 불러오기</b>로 그대로 꺼내 쓸 수 있습니다.</div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. 위험개소 체크리스트 ===================== -->
+  <section id="scr-risk" hidden>
+    <div class="card">
+      <h2>작성자</h2>
+      <div id="rkWriterView" style="display:none">
+        <span class="tag" id="rkWriterText"></span>
+        <button class="btn w sm" style="margin-left:8px" onclick="rkWriterEdit()">변경</button>
+        <div class="hint">한 번 저장하면 이 기기에서 계속 이 이름으로 들어갑니다.</div>
+      </div>
+      <div id="rkWriterEdit">
+        <input type="text" id="rkWriter" placeholder="예: 홍길동">
+        <div style="margin-top:10px"><button class="btn" onclick="rkWriterSave()">저장</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">1</span> 구분</h2>
+      <div class="seg rk-cat" id="rkCat"></div>
+    </div>
+
+    <div id="rkForm" style="display:none">
+      <div class="card">
+        <h2><span class="n">2</span> <span id="rkNoLabel">SK관리번호</span></h2>
+        <input type="text" id="rkNo" placeholder="예: 동안구MH600" oninput="rkSetNo(this.value)">
+      </div>
+
+      <div class="card">
+        <h2><span class="n">3</span> 위험도 평가 <span class="cnt">각 1개 선택</span></h2>
+        <div id="rkStages"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="n">4</span> Critical 위험요소 <span class="cnt">여러 개 선택</span></h2>
+        <div class="rk-crit" id="rkCrit"></div>
+        <div class="hint"><span class="rk-c4" style="margin:0">C4 적용</span> 표시 항목을 고르면 최종 등급이 C4가 됩니다.
+          해당 없으면 아무것도 고르지 않고 넘어가세요.</div>
+      </div>
+
+      <div class="card rk-result">
+        <div class="rk-final-row"><b>최종 등급</b><div id="rkFinal"></div></div>
+        <button class="btn full" id="rkSaveBtn" onclick="rkSave()" style="margin-top:12px">이 개소 저장</button>
+        <button class="btn w full sm" id="rkCancelEdit" onclick="rkCancelEdit()" style="margin-top:8px;display:none">수정 취소</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>쌓인 목록 <span class="cnt" id="rkCount">0건</span></h2>
+      <div class="list" id="rkList"></div>
+      <div class="hint">항목을 누르면 고칠 수 있습니다. <b>엑셀 만들기</b>를 누르면 지금까지 쌓인
+        것이 전부 한 파일에 들어갑니다. 엑셀을 받아도 목록은 그대로 남습니다.</div>
+      <button class="btn w full sm" id="rkClear" onclick="rkClearAll()"
+        style="margin-top:12px;color:#B23A3A;border-color:#E2BFBF;display:none">목록 모두 비우기</button>
     </div>
   </section>
 </div>
@@ -1735,6 +1935,8 @@ const SCREENS = {
   site:    { el: 'scr-site',    title: '국사 사진',       sub: '',                            back: 'month', act: ['목록으로', 'auBackToMonth'] },
   liaison: { el: 'scr-liaison', title: '유관기관협의',    sub: '받은 자료에 이름·서명 얹기',   back: 'home',  act: null },
   lidoc:   { el: 'scr-lidoc',   title: '문서 편집',       sub: '',                            back: 'liaison', act: ['PDF로 저장', 'liSavePdf'] },
+  lihelp:  { el: 'scr-lihelp',  title: '쓰는 법',         sub: '유관기관협의',                 back: 'liaison', act: null },
+  risk:    { el: 'scr-risk',    title: '위험개소 체크리스트', sub: '맨홀 · 전주 · 국소 위험도 평가', back: 'home', act: ['엑셀 만들기', 'rkMakeExcel'] },
 };
 let screen = 'home';
 
@@ -1757,7 +1959,9 @@ function go(name) {
   if (name === 'month') auRenderMonth();
   if (name === 'site') auRenderSite();
   if (name === 'manhole') mhRender();
+  setStatus('자동 저장됨');
   if (name === 'liaison') liRenderSetup();
+  if (name === 'risk') rkRender();
   if (name === 'lidoc') { liRenderDoc(); setTimeout(liFixFontSizes, 60); }
 }
 function back() { const s = SCREENS[screen]; if (s.back) go(s.back); }
@@ -4014,6 +4218,482 @@ function liBuildPdf(pages) {
 window.addEventListener('resize', () => { if (screen === 'lidoc') liFixFontSizes(); });
 
 
+
+/* =====================================================================
+ * 업무 5 — 위험개소 체크리스트 (맨홀 · 전주 · 국소 위험도 평가)
+ *   한 개소씩 평가해서 앱 안에 차곡차곡 쌓고,
+ *   엑셀을 받으면 지금까지 쌓인 것이 한 파일에 모두 들어간다.
+ * ===================================================================== */
+
+/* 평가 기준 — '위험도 평가 Logic' 시트 그대로.
+   s2·s3 는 1단계(설치 위치)에 따라 달라진다. crit 의 두 번째 값이 true 면 'C4 추가 적용' 항목. */
+const RK_LOGIC = {
+  '맨홀': {
+    groups: [
+      { t: '공원/녹지/법면', g: 'C1',
+        s2: [['설치 위치에 경사도 없음', 'C1'], ['설치 위치에 경사도15도 이하', 'C3'], ['설치 위치에 경사도15도 이상', 'C4']],
+        s3: [['유해동물(뱀,벌 등 육안확인) 없음', 'C1'], ['집단서식, 벌집형성', 'C3'], ['말벌집 대형화_작업 동선에 위치함', 'C4']] },
+      { t: '인도', g: 'C1',
+        s2: [['보행자/자전거 우회 통로 확보', 'C1'], ['보행자/자전거 우회 통로 일부확보', 'C2'], ['보행자/자전거 우회 통로 미확보', 'C3']],
+        s3: [] },
+      { t: '이면도로', g: 'C2',
+        s2: [['차량/보행자 우회(통행) 가능', 'C2'], ['보행자 통행 가능/차량 통행 불가능', 'C3'], ['차량/보행자 우회(통행) 불가능', 'C4']],
+        s3: [] },
+      { t: '차도', g: 'C2',
+        s2: [['1개 차선 통제', 'C2'], ['단방향 통제', 'C3'], ['전면 통제', 'C4']],
+        s3: [['곡선반경 구간 해당없음', 'C2'], ['곡선반경 구간으로 차량시야 일부 확보', 'C3'], ['곡선반경 구간으로 차량시야 확보 불가', 'C4']] },
+      { t: '터널/지하철', g: 'C4', s2: [], s3: [] },
+    ],
+    crit: [['상시 침수 발생', true], ['유해가스 발생 이력 존재', false],
+           ['작업 공간 협소(없음) 및 접근불가', true], ['깊이 2.5M 이상의 사다리 파손/없음', false],
+           ['전기선과 시설물의 혼촉 발생', false]],
+  },
+  '전주': {
+    groups: [
+      { t: '나대지', g: 'C1',
+        s2: [['고소차 활용 가능', 'C1'], ['작업 영역 확보 후 작업 가능', 'C3'], ['고소차 활용 불가', 'C4']],
+        s3: [] },
+      { t: '차도 옆', g: 'C1',
+        s2: [['인도 점유', 'C1'], ['차선 일부 점유', 'C1'], ['1개 차선 점유', 'C2']],
+        s3: [['곡선반경 구간 해당없음', 'C1'], ['곡선반경 구간으로 차량시야 일부 확보', 'C3'], ['곡선반경 구간으로 차량시야 확보 불가', 'C4']] },
+      { t: '산악/절벽/하천 옆', g: 'C1',
+        s2: [['완만한 지반', 'C1'], ['경사도 15도 이하', 'C3'], ['경사도 15도 이상', 'C4']],
+        s3: [['붕괴나 낙하의 위험이 없음', 'C1'], ['붕괴나 낙하의 위험이 존재', 'C4']] },
+    ],
+    crit: [['변압주 이격거리 2M 이내', true], ['전주(자가주)의 기울기가 10도 이상', true],
+           ['말벌집 대형화_작업 동선에 위치함', false], ['고소차 활용 작업불가', true],
+           ['주변의 구조물로 인한 위험 존재', true], ['전주(자가주)의 외부 크랙하부, 철근 보임', true]],
+  },
+  '국소': {
+    groups: [
+      { t: '실내', g: 'C1', s2: [], s3: [] },
+      { t: '옥상/옥탑', g: 'C1',
+        s2: [['사다리 승주 불필요', 'C1'], ['3.5M 이하 사다리 승주', 'C3'], ['3.5M 이상 사다리 승주', 'C4']],
+        s3: [['고정 사다리 있음', 'C2/C3'], ['고정 사다리 없음', 'C4']] },
+      { t: '종말주', g: 'C2',
+        s2: [['철탑 및 전주 기울기 이상무', 'C2'], ['철탑 및 전주가 10도 이하 기울어 졌는가', 'C3'], ['철탑 및 전주가 10도 이상 기울어 졌는가', 'C4']],
+        s3: [['고소차 활용 작업이 필요없음', 'C2'], ['고소차 활용 작업 필요함', 'C3'], ['고소차 활용 작업 필요하나 고소차 활용 불가', 'C4']] },
+      { t: '터널/철도 내', g: 'C4', s2: [], s3: [] },
+    ],
+    crit: [['해당 국소까지 차량 이동 불가', true], ['작업 공간 협소(없음) 및 접근불가', true],
+           ['말벌집 대형화_작업 동선에 위치함', false], ['안전 시설물 없음(안전발판, 안전고리, 난간)', false],
+           ['전기선과 시설물의 혼촉 발생', false]],
+  },
+};
+const RK_CATS = ['맨홀', '전주', '국소'];
+/* 구분마다 쓰는 번호가 다르다 — 전주는 전산화번호 */
+const RK_NO = {
+  '맨홀': { label: 'SK관리번호', ph: '예: 동안구MH600', caps: false },
+  '전주': { label: '전산화번호', ph: '예: 9521Z971',   caps: true },
+  '국소': { label: 'SK관리번호', ph: '예: 화성TP1234', caps: false },
+};
+const rkNoName = cat => (RK_NO[cat] || RK_NO['맨홀']).label;
+
+/* 등급 → 숫자. 'C2/C3' 처럼 둘 중 하나인 것은 높은 쪽(C3)으로 본다 */
+function rkRank(g) {
+  const m = String(g || '').match(/C(\d)/g);
+  return m ? Math.max(...m.map(x => +x.slice(1))) : 0;
+}
+/** 최종 등급 : 고른 단계 중 가장 높은 등급, 'C4 추가 적용' Critical 이 하나라도 있으면 C4 */
+function rkFinal(stages, crits) {
+  let r = 0;
+  for (const s of stages) if (s) r = Math.max(r, rkRank(s.g));
+  if (crits.some(c => c.c4)) r = 4;
+  return r ? 'C' + r : '';
+}
+
+let rkWriter = lsGet('rkWriter');
+let rkList = [];                 // 쌓인 평가
+let rkForm = { cat: '', no: '', s1: -1, s2: -1, s3: -1, crit: [], editId: null };
+
+/* ---------------- 저장 ---------------- */
+async function rkLoad() {
+  try { const v = await dbGet('rk.list'); if (Array.isArray(v)) rkList = v; } catch (e) { /* 무시 */ }
+  try { const d = JSON.parse(lsGet('rkDraft') || 'null'); if (d && d.cat !== undefined) rkForm = Object.assign(rkForm, d); } catch (e) { /* 무시 */ }
+}
+async function rkSaveList() { try { await dbPut('rk.list', rkList); } catch (e) { /* 무시 */ } }
+function rkSaveDraft() { lsSet('rkDraft', JSON.stringify(rkForm)); }
+
+/* ---------------- 작성자 (한 번 저장하면 잠김) ---------------- */
+function rkRenderWriter() {
+  const has = !!rkWriter;
+  document.getElementById('rkWriterView').style.display = has ? 'block' : 'none';
+  document.getElementById('rkWriterEdit').style.display = has ? 'none' : 'block';
+  document.getElementById('rkWriterText').textContent = rkWriter || '';
+  document.getElementById('rkWriter').value = rkWriter || '';
+}
+function rkWriterSave() {
+  const v = document.getElementById('rkWriter').value.trim();
+  if (!v) { show('err', '작성자를 입력하세요.', 2500); return; }
+  rkWriter = v; lsSet('rkWriter', v);
+  rkRenderWriter();
+  show('ok', '작성자를 저장했습니다. 다음부터 자동으로 들어갑니다.', 2500);
+}
+function rkWriterEdit() {
+  document.getElementById('rkWriterView').style.display = 'none';
+  document.getElementById('rkWriterEdit').style.display = 'block';
+}
+
+/* ---------------- 입력 화면 ---------------- */
+function rkGroup() {
+  const L = RK_LOGIC[rkForm.cat];
+  return L && rkForm.s1 >= 0 ? L.groups[rkForm.s1] : null;
+}
+const rkGradeTag = g => g ? `<span class="rk-g ${'C' + rkRank(g)}">${esc(g)}</span>` : '';
+
+function rkRender() {
+  rkRenderWriter();
+  // 1. 구분
+  document.getElementById('rkCat').innerHTML = RK_CATS.map(c =>
+    `<button class="${rkForm.cat === c ? 'on' : ''}" onclick="rkSetCat('${c}')">${c}</button>`).join('');
+  const has = !!rkForm.cat;
+  document.getElementById('rkForm').style.display = has ? 'block' : 'none';
+  if (has) {
+    const no = document.getElementById('rkNo');
+    const nm = RK_NO[rkForm.cat];
+    document.getElementById('rkNoLabel').textContent = nm.label;
+    no.placeholder = nm.ph;
+    no.setAttribute('autocapitalize', nm.caps ? 'characters' : 'off');
+    if (document.activeElement !== no) no.value = rkForm.no || '';
+    rkRenderStages();
+    rkRenderCrit();
+    rkRenderFinal();
+  }
+  rkRenderList();
+  rkRenderFoot();
+}
+
+function rkSelect(id, label, opts, cur, fn) {
+  return `<label>${label}</label>
+    <select id="${id}" onchange="${fn}(+this.value)">
+      <option value="-1">선택하세요</option>
+      ${opts.map((o, i) => `<option value="${i}"${i === cur ? ' selected' : ''}>${esc(o[0])}  (${esc(o[1])})</option>`).join('')}
+    </select>`;
+}
+function rkRenderStages() {
+  const L = RK_LOGIC[rkForm.cat];
+  const g = rkGroup();
+  let h = rkSelect('rkS1', '1단계 · 설치 위치', L.groups.map(x => [x.t, x.g]), rkForm.s1, 'rkSetS1');
+  if (g && g.s2.length) h += rkSelect('rkS2', '2단계 · 현장환경', g.s2, rkForm.s2, 'rkSetS2');
+  if (g && g.s3.length) h += rkSelect('rkS3', '3단계 · 현장환경', g.s3, rkForm.s3, 'rkSetS3');
+  if (g && !g.s2.length && !g.s3.length) {
+    h += '<div class="hint">이 설치 위치는 2·3단계가 없습니다. 바로 Critical 위험요소로 넘어가세요.</div>';
+  }
+  document.getElementById('rkStages').innerHTML = h;
+}
+function rkRenderCrit() {
+  const L = RK_LOGIC[rkForm.cat];
+  document.getElementById('rkCrit').innerHTML = L.crit.map(([t, c4], i) => {
+    const on = rkForm.crit.includes(i);
+    return `<label class="${on ? 'on' : ''}">
+      <input type="checkbox" ${on ? 'checked' : ''} onchange="rkToggleCrit(${i}, this.checked)">
+      <span>${esc(t)}${c4 ? '<span class="rk-c4">C4 적용</span>' : ''}</span></label>`;
+  }).join('');
+}
+/** 지금 고른 내용을 저장용 모양으로 */
+function rkCollect() {
+  const L = RK_LOGIC[rkForm.cat];
+  if (!L) return null;
+  const g = rkGroup();
+  const pick = (arr, i) => (arr && i >= 0 && arr[i]) ? { t: arr[i][0], g: arr[i][1] } : null;
+  const s1 = g ? { t: g.t, g: g.g } : null;
+  const s2 = g ? pick(g.s2, rkForm.s2) : null;
+  const s3 = g ? pick(g.s3, rkForm.s3) : null;
+  const crit = rkForm.crit.slice().sort((a, b) => a - b).map(i => ({ t: L.crit[i][0], c4: L.crit[i][1] }));
+  return { s1, s2, s3, crit, final: rkFinal([s1, s2, s3], crit) };
+}
+function rkRenderFinal() {
+  const c = rkCollect();
+  const el = document.getElementById('rkFinal');
+  if (!c || !c.final) { el.innerHTML = '<span class="hint" style="margin:0">단계를 고르면 등급이 나옵니다.</span>'; }
+  else {
+    const why = c.crit.some(x => x.c4) ? 'C4 적용 Critical 위험요소 선택'
+      : '고른 단계 중 가장 높은 등급';
+    el.innerHTML = `<span class="rk-g big ${c.final}">${c.final}</span>
+      <span class="hint" style="margin:0">${why}</span>`;
+  }
+  const btn = document.getElementById('rkSaveBtn');
+  btn.textContent = rkForm.editId ? '수정 내용 저장' : '이 개소 저장';
+  document.getElementById('rkCancelEdit').style.display = rkForm.editId ? 'inline-flex' : 'none';
+}
+
+function rkSetCat(c) {
+  if (rkForm.cat === c) return;
+  rkForm.cat = c; rkForm.s1 = rkForm.s2 = rkForm.s3 = -1; rkForm.crit = [];
+  rkSaveDraft(); rkRender();
+}
+function rkSetNo(v) { rkForm.no = v; rkSaveDraft(); }
+function rkSetS1(i) { rkForm.s1 = i; rkForm.s2 = rkForm.s3 = -1; rkSaveDraft(); rkRenderStages(); rkRenderFinal(); }
+function rkSetS2(i) { rkForm.s2 = i; rkSaveDraft(); rkRenderFinal(); }
+function rkSetS3(i) { rkForm.s3 = i; rkSaveDraft(); rkRenderFinal(); }
+function rkToggleCrit(i, on) {
+  rkForm.crit = rkForm.crit.filter(x => x !== i);
+  if (on) rkForm.crit.push(i);
+  rkSaveDraft(); rkRenderCrit(); rkRenderFinal();
+}
+
+function rkNow() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** 한 개소 저장 → 목록에 쌓는다 */
+async function rkSave() {
+  if (!rkWriter) { show('err', '먼저 작성자를 저장하세요.', 3000); return; }
+  if (!rkForm.cat) { show('err', '구분(맨홀·전주·국소)을 고르세요.', 3000); return; }
+  let no = (document.getElementById('rkNo').value || '').trim();
+  if (RK_NO[rkForm.cat].caps) no = no.toUpperCase();
+  rkForm.no = no;
+  if (!no) { show('err', `${rkNoName(rkForm.cat)}를 입력하세요.`, 3000); document.getElementById('rkNo').focus(); return; }
+  const g = rkGroup();
+  if (!g) { show('err', '1단계 설치 위치를 고르세요.', 3000); return; }
+  if (g.s2.length && rkForm.s2 < 0) { show('err', '2단계 현장환경을 고르세요.', 3000); return; }
+  if (g.s3.length && rkForm.s3 < 0) { show('err', '3단계 현장환경을 고르세요.', 3000); return; }
+
+  const c = rkCollect();
+  const editing = rkForm.editId;
+  const dup = rkList.find(e => e.no === no && e.cat === rkForm.cat && e.id !== editing);
+  if (dup && !confirm(`${rkForm.cat} ${no} 은(는) 이미 목록에 있습니다.\n그래도 하나 더 저장할까요?`)) return;
+
+  if (editing) {
+    const e = rkList.find(x => x.id === editing);
+    if (e) Object.assign(e, { cat: rkForm.cat, no, writer: rkWriter }, c);
+  } else {
+    rkList.push(Object.assign({ id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                                at: rkNow(), writer: rkWriter, cat: rkForm.cat, no }, c));
+  }
+  await rkSaveList();
+
+  // 다음 개소를 바로 입력할 수 있게 비운다 (구분은 그대로 둔다)
+  rkForm = { cat: rkForm.cat, no: '', s1: -1, s2: -1, s3: -1, crit: [], editId: null };
+  rkSaveDraft();
+  document.getElementById('rkNo').value = '';
+  rkRender();
+  show('ok', editing ? `<b>${esc(no)}</b> 수정했습니다.`
+                     : `<b>${esc(no)}</b> 저장했습니다. 지금까지 <b>${rkList.length}건</b> 쌓였습니다.`, 3500);
+}
+
+function rkCancelEdit() {
+  rkForm = { cat: rkForm.cat, no: '', s1: -1, s2: -1, s3: -1, crit: [], editId: null };
+  rkSaveDraft(); document.getElementById('rkNo').value = ''; rkRender();
+}
+
+/** 목록에서 고쳐 쓰기 */
+function rkEdit(id) {
+  const e = rkList.find(x => x.id === id);
+  if (!e) return;
+  const L = RK_LOGIC[e.cat];
+  const gi = L.groups.findIndex(x => e.s1 && x.t === e.s1.t);
+  const g = L.groups[gi];
+  rkForm = {
+    cat: e.cat, no: e.no, s1: gi,
+    s2: g && e.s2 ? g.s2.findIndex(x => x[0] === e.s2.t) : -1,
+    s3: g && e.s3 ? g.s3.findIndex(x => x[0] === e.s3.t) : -1,
+    crit: (e.crit || []).map(c => L.crit.findIndex(x => x[0] === c.t)).filter(i => i >= 0),
+    editId: id,
+  };
+  rkSaveDraft();
+  document.getElementById('rkNo').value = e.no;
+  rkRender();
+  window.scrollTo(0, 0);
+  show('warn', `<b>${esc(e.no)}</b> 을(를) 고치는 중입니다. 다 고친 뒤 <b>수정 내용 저장</b>을 누르세요.`, 0);
+}
+async function rkDel(id) {
+  const e = rkList.find(x => x.id === id);
+  if (!e || !confirm(`${e.cat} ${e.no} 을(를) 목록에서 지울까요?`)) return;
+  rkList = rkList.filter(x => x.id !== id);
+  if (rkForm.editId === id) rkCancelEdit();
+  await rkSaveList(); rkRender();
+}
+async function rkClearAll() {
+  if (!rkList.length) return;
+  if (!confirm(`쌓인 ${rkList.length}건을 모두 지울까요?\n엑셀을 먼저 받아 두셨는지 확인하세요.`)) return;
+  rkList = []; await rkSaveList(); rkRender();
+  show('ok', '목록을 비웠습니다.', 2500);
+}
+
+function rkRenderList() {
+  const box = document.getElementById('rkList');
+  document.getElementById('rkCount').textContent = rkList.length + '건';
+  if (!rkList.length) {
+    box.innerHTML = '<div class="empty">아직 저장한 개소가 없습니다.</div>';
+    document.getElementById('rkClear').style.display = 'none';
+    return;
+  }
+  document.getElementById('rkClear').style.display = 'block';
+  box.innerHTML = rkList.slice().reverse().map(e => `
+    <div class="item${rkForm.editId === e.id ? ' rk-editing' : ''}">
+      ${rkGradeTag(e.final)}
+      <div class="tx" onclick="rkEdit('${e.id}')"><b>${esc(e.no)}</b>
+        <span>${esc(e.cat)} · ${esc(e.s1 ? e.s1.t : '')} · ${esc(e.at.slice(5))}</span></div>
+      <button class="item-ed" onclick="rkEdit('${e.id}')">수정</button>
+      <button class="rm" onclick="rkDel('${e.id}')">삭제</button>
+    </div>`).join('');
+}
+function rkRenderFoot() {
+  if (screen !== 'risk') return;
+  const btn = document.getElementById('actBtn');
+  btn.textContent = rkList.length ? `엑셀 만들기 (${rkList.length}건)` : '엑셀 만들기';
+  setStatus(rkList.length ? `${rkList.length}건 쌓임 · 자동 저장됨` : '자동 저장됨');
+}
+
+/* ---------------- 엑셀 ---------------- */
+async function rkMakeExcel() {
+  if (!rkList.length) { show('err', '아직 저장한 개소가 없습니다. 먼저 <b>이 개소 저장</b>을 눌러 쌓아 주세요.', 4000); return; }
+  if (rkForm.editId) { show('err', '고치던 개소를 먼저 저장하거나 취소하세요.', 3500); return; }
+  const btn = document.getElementById('actBtn');
+  btn.disabled = true; setStatus('엑셀 만드는 중…');
+  try {
+    const out = RiskXlsx.build({ writer: rkWriter, rows: rkList, made: rkNow() });
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    const ymd = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
+    download(out, `위험개소 체크리스트_${safeName(rkWriter) || '작성자'}_${ymd}${FILE_EXT}`);
+  } catch (e) {
+    console.error(e);
+    show('err', '엑셀을 만들지 못했습니다.<br>' + (e && e.message ? e.message : ''), 8000);
+  } finally { btn.disabled = false; rkRenderFoot(); }
+}
+
+/* 엑셀 파일을 처음부터 만든다 (양식 없이) */
+const RiskXlsx = (function () {
+  const { zip } = XlsxLite;
+  const SHEET = '위험개소 체크리스트';
+  const HEAD = ['순번', '점검일시', '작성자', '구분', 'SK관리번호\n(전주: 전산화번호)',
+                '설치 위치\n(1단계)', '등급', '현장환경\n(2단계)', '등급', '현장환경\n(3단계)', '등급',
+                'Critical 위험요소', '최종\n등급'];
+  const WIDTH = [6, 16.5, 10, 7, 17, 17, 6.5, 30, 6.5, 33, 6.5, 38, 8];
+  const x = s => String(s == null ? '' : s)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const colName = i => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+  const cell = (r, c, v, st) => {
+    const ref = colName(c) + r;
+    if (v === '' || v == null) return `<c r="${ref}" s="${st}"/>`;
+    if (typeof v === 'number') return `<c r="${ref}" s="${st}"><v>${v}</v></c>`;
+    return `<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${x(v)}</t></is></c>`;
+  };
+  /* 글이 몇 줄이 될지 대략 잰다 (한글은 폭 2칸) */
+  const lines = (s, w) => String(s || '').split('\n').reduce((n, ln) => {
+    let u = 0; for (const ch of ln) u += /[ㄱ-힝]/.test(ch) ? 2 : 1.1;
+    return n + Math.max(1, Math.ceil(u / (w * 1.15)));
+  }, 0);
+  const GRADE_ST = { C1: 5, C2: 6, C3: 7, C4: 8 };
+
+  /* 스타일 번호
+     0 기본 · 1 제목 · 2 머리글 · 3 본문(왼쪽) · 4 본문(가운데) · 5~8 등급 C1~C4 · 9 부제 */
+  const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts count="6">
+<font><sz val="10"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+<font><b/><sz val="14"/><color rgb="FF1F3864"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+<font><sz val="10"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+<font><b/><sz val="10"/><color rgb="FF9C0006"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+<font><sz val="9"/><color rgb="FF6B7B8C"/><name val="맑은 고딕"/><family val="3"/><charset val="129"/></font>
+</fonts>
+<fills count="7">
+<fill><patternFill patternType="none"/></fill>
+<fill><patternFill patternType="gray125"/></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF1F4E79"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFE2EFDA"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFFCE4D6"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFFFC7CE"/><bgColor indexed="64"/></patternFill></fill>
+</fills>
+<borders count="2">
+<border><left/><right/><top/><bottom/><diagonal/></border>
+<border><left style="thin"><color rgb="FFB4C6DC"/></left><right style="thin"><color rgb="FFB4C6DC"/></right><top style="thin"><color rgb="FFB4C6DC"/></top><bottom style="thin"><color rgb="FFB4C6DC"/></bottom><diagonal/></border>
+</borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="10">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
+<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="3" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="4" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+
+  function build({ writer, rows, made }) {
+    const N = rows.length;
+    const st = (g) => GRADE_ST['C' + rkRank(g)] || 4;
+    let sd = '';
+    sd += `<row r="1" ht="26" customHeight="1">${cell(1, 0, SHEET, 1)}</row>`;
+    sd += `<row r="2" ht="17" customHeight="1">${cell(2, 0,
+      `작성자 ${writer || ''}   ·   출력 ${made}   ·   총 ${N}건   ·   최종 등급: 고른 단계 중 가장 높은 등급, 'C4 적용' Critical 선택 시 C4`, 9)}</row>`;
+    sd += `<row r="3" ht="32" customHeight="1">${HEAD.map((h, c) => cell(3, c, h, 2)).join('')}</row>`;
+    rows.forEach((e, i) => {
+      const r = 4 + i;
+      const crit = (e.crit || []).map(c => '· ' + c.t + (c.c4 ? ' [C4]' : '')).join('\n');
+      const vals = [
+        [i + 1, 4], [e.at, 4], [e.writer || writer || '', 4], [e.cat, 4], [e.no, 4],
+        [e.s1 ? e.s1.t : '', 3], [e.s1 ? e.s1.g : '', e.s1 ? st(e.s1.g) : 4],
+        [e.s2 ? e.s2.t : '-', 3], [e.s2 ? e.s2.g : '', e.s2 ? st(e.s2.g) : 4],
+        [e.s3 ? e.s3.t : '-', 3], [e.s3 ? e.s3.g : '', e.s3 ? st(e.s3.g) : 4],
+        [crit || '없음', 3], [e.final || '', e.final ? st(e.final) : 4],
+      ];
+      const n = Math.max(1, lines(vals[5][0], WIDTH[5]), lines(vals[7][0], WIDTH[7]),
+                         lines(vals[9][0], WIDTH[9]), lines(crit, WIDTH[11]), lines(e.no, WIDTH[4]));
+      sd += `<row r="${r}" ht="${Math.max(22, n * 14.5 + 6)}" customHeight="1">` +
+            vals.map(([v, s], c) => cell(r, c, v, s)).join('') + '</row>';
+    });
+
+    const lastRow = 3 + N;
+    const ref = `A3:M${lastRow}`;
+    const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+<dimension ref="A1:M${lastRow}"/>
+<sheetViews><sheetView tabSelected="1" workbookViewId="0"><pane ySplit="3" topLeftCell="A4" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A4" sqref="A4"/></sheetView></sheetViews>
+<sheetFormatPr defaultRowHeight="16.5"/>
+<cols>${WIDTH.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>
+<sheetData>${sd}</sheetData>
+<autoFilter ref="${ref}"/>
+<mergeCells count="2"><mergeCell ref="A1:M1"/><mergeCell ref="A2:M2"/></mergeCells>
+<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>
+<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>
+</worksheet>`;
+
+    const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<bookViews><workbookView/></bookViews>
+<sheets><sheet name="${x(SHEET)}" sheetId="1" r:id="rId1"/></sheets>
+<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${x(SHEET)}'!$A$3:$M$${lastRow}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">'${x(SHEET)}'!$3:$3</definedName></definedNames>
+</workbook>`;
+
+    const files = new Map();
+    files.set('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`);
+    files.set('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`);
+    files.set('xl/workbook.xml', workbook);
+    files.set('xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`);
+    files.set('xl/styles.xml', STYLES);
+    files.set('xl/worksheets/sheet1.xml', sheet);
+    return zip(files);
+  }
+  return { build };
+})();
+
+
 /* ---------------- 시작 ---------------- */
 (async function init() {
   // 저장소가 느리거나 막혀 있어도 화면은 곧바로 뜨게 한다
@@ -4031,6 +4711,7 @@ window.addEventListener('resize', () => { if (screen === 'lidoc') liFixFontSizes
     await mhRestore();
     await auLoadIndex();
     await liLoadSet();
+    await rkLoad();
     paint();                       // 불러온 내용으로 다시 그린다
   } catch (e) {
     console.error(e);
