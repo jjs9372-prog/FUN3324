@@ -693,6 +693,14 @@ input[type=file]{display:none}
         <textarea id="rkNote" placeholder="특이사항이 있으면 자유롭게 적으세요" oninput="rkSetNote(this.value)"></textarea>
       </div>
 
+      <div class="card">
+        <h2><span class="n">6</span> 사진 <span class="cnt" id="rkPhCount">0/3</span></h2>
+        <div id="rkPhotos"></div>
+        <input type="file" id="rkCam" accept="image/*" capture="environment" onchange="rkPhChosen(event)">
+        <input type="file" id="rkAlbum" accept="image/*" onchange="rkPhChosen(event)">
+        <div class="hint">칸마다 한 장씩 들어갑니다. 엑셀에서는 그 개소 줄 맨 오른쪽에 사진이 붙습니다.</div>
+      </div>
+
       <div class="card rk-result">
         <div class="rk-final-row"><b>최종 등급</b><div id="rkFinal"></div></div>
         <button class="btn full" id="rkSaveBtn" onclick="rkSave()" style="margin-top:12px">이 개소 저장</button>
@@ -4315,6 +4323,10 @@ let rkForm = { cat: '', no: '', s1: -1, s2: -1, s3: -1, crit: [], note: '', edit
 /* ---------------- 저장 ---------------- */
 async function rkLoad() {
   try { const v = await dbGet('rk.list'); if (Array.isArray(v)) rkList = v; } catch (e) { /* 무시 */ }
+  try {
+    const d = await dbGet('rk.draftph');
+    if (d) for (const [k] of RK_PH) if (d[k] && d[k].blob) rkPhotos[k] = { blob: d[k].blob, w: d[k].w, h: d[k].h };
+  } catch (e) { /* 무시 */ }
   // 기준이 바뀌어도 이미 쌓인 것까지 같은 기준으로 맞춘다
   for (const e of rkList) {
     (e.crit || []).forEach(c => { c.c4 = true; });
@@ -4371,6 +4383,7 @@ function rkRender() {
     if (document.activeElement !== nt) nt.value = rkForm.note || '';
     rkRenderStages();
     rkRenderCrit();
+    rkRenderPhotos();
     rkRenderFinal();
   }
   rkRenderList();
@@ -4447,6 +4460,86 @@ function rkToggleCrit(i, on) {
   rkSaveDraft(); rkRenderCrit(); rkRenderFinal();
 }
 
+/* ---------------- 사진 (전경사진_1 · 전경사진_2 · 시설물 사진) ---------------- */
+const RK_PH = [['f1', '전경사진_1'], ['f2', '전경사진_2'], ['fac', '시설물 사진']];
+let rkPhotos = { f1: null, f2: null, fac: null };     // 작성 중인 사진 {blob, w, h, url}
+let rkPhTarget = null;
+const rkPhKey = (id, k) => `rk.ph.${id}.${k}`;         // 저장된 개소의 사진 자리
+
+function rkPhUrl(p) { if (p && !p.url) p.url = URL.createObjectURL(p.blob); return p ? p.url : ''; }
+async function rkSaveDraftPh() {
+  try {
+    const o = {};
+    for (const [k] of RK_PH) { const p = rkPhotos[k]; o[k] = p ? { blob: p.blob, w: p.w, h: p.h } : null; }
+    await dbPut('rk.draftph', o);
+  } catch (e) { /* 무시 */ }
+}
+function rkClearPhotos() {
+  for (const [k] of RK_PH) { const p = rkPhotos[k]; if (p && p.url) URL.revokeObjectURL(p.url); rkPhotos[k] = null; }
+  rkSaveDraftPh();
+}
+function rkPhCount() { return RK_PH.filter(([k]) => rkPhotos[k]).length; }
+function rkRenderPhotos() {
+  const box = document.getElementById('rkPhotos');
+  if (!box) return;
+  document.getElementById('rkPhCount').textContent = rkPhCount() + '/3';
+  box.innerHTML = RK_PH.map(([k, label]) => {
+    const p = rkPhotos[k];
+    return `<div class="slot">
+      <div class="hd"><b>${label}</b><span class="tag">${p ? '1/1' : '0/1'}</span></div>
+      <div class="bd">
+        ${p ? `<img class="pv" src="${rkPhUrl(p)}" alt="">` : '<div class="none">사진 없음</div>'}
+        <div class="row" style="margin-top:10px">
+          <button class="btn sm" style="flex:1" onclick="rkPickPh('${k}', true)">촬영</button>
+          <button class="btn w sm" style="flex:1" onclick="rkPickPh('${k}', false)">앨범</button>
+          ${p ? `<button class="btn w sm" style="color:#B23A3A;border-color:#E2BFBF" onclick="rkDelPh('${k}')">지우기</button>` : ''}
+        </div>
+      </div></div>`;
+  }).join('');
+}
+function rkPickPh(k, cam) { rkPhTarget = k; document.getElementById(cam ? 'rkCam' : 'rkAlbum').click(); }
+async function rkPhChosen(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!f || !rkPhTarget) return;
+  setStatus('사진 정리 중…');
+  try {
+    const sh = await shrink(f);
+    const old = rkPhotos[rkPhTarget];
+    if (old && old.url) URL.revokeObjectURL(old.url);
+    rkPhotos[rkPhTarget] = { blob: sh.blob, w: sh.w, h: sh.h };
+    await rkSaveDraftPh();
+    rkRenderPhotos();
+  } catch (e) {
+    console.error(e);
+    show('err', '사진을 읽지 못했습니다.', 4000);
+  } finally { rkRenderFoot(); }
+}
+function rkDelPh(k) {
+  const p = rkPhotos[k];
+  if (p && p.url) URL.revokeObjectURL(p.url);
+  rkPhotos[k] = null;
+  rkSaveDraftPh(); rkRenderPhotos();
+}
+async function rkDelEntryPhotos(id) {
+  for (const [k] of RK_PH) { try { await dbDel(rkPhKey(id, k)); } catch (e) { /* 무시 */ } }
+}
+/** 엑셀에 넣을 크기로 줄인다 (파일이 너무 커지지 않게) */
+async function rkPhForExcel(blob) {
+  let bmp;
+  try { bmp = await createImageBitmap(blob); }
+  catch (e) { bmp = await liLoadImage(URL.createObjectURL(blob)); }
+  const sc = Math.min(1, 800 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(bmp.width * sc)); cv.height = Math.max(1, Math.round(bmp.height * sc));
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+  const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.78));
+  const out = { bytes: new Uint8Array(await b.arrayBuffer()), w: cv.width, h: cv.height };
+  if (bmp.close) bmp.close();
+  cv.width = cv.height = 0;
+  return out;
+}
+
 function rkNow() {
   const d = new Date(), p = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
@@ -4470,13 +4563,21 @@ async function rkSave() {
   const dup = rkList.find(e => e.no === no && e.cat === rkForm.cat && e.id !== editing);
   if (dup && !confirm(`${rkForm.cat} ${no} 은(는) 이미 목록에 있습니다.\n그래도 하나 더 저장할까요?`)) return;
 
+  if (!rkPhCount() && !confirm('사진이 한 장도 없습니다.\n그래도 저장할까요?')) return;
   const note = (document.getElementById('rkNote').value || '').trim();
+  const id = editing || ('r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  // 사진은 개소마다 따로 보관한다 (목록 전체를 매번 다시 쓰지 않도록)
+  const ph = {};
+  for (const [k] of RK_PH) {
+    const p = rkPhotos[k];
+    if (p) { await dbPut(rkPhKey(id, k), p.blob); ph[k] = { w: p.w, h: p.h }; }
+    else { try { await dbDel(rkPhKey(id, k)); } catch (e) { /* 무시 */ } }
+  }
   if (editing) {
     const e = rkList.find(x => x.id === editing);
-    if (e) Object.assign(e, { cat: rkForm.cat, no, writer: rkWriter, note }, c);
+    if (e) Object.assign(e, { cat: rkForm.cat, no, writer: rkWriter, note, ph }, c);
   } else {
-    rkList.push(Object.assign({ id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                                at: rkNow(), writer: rkWriter, cat: rkForm.cat, no, note }, c));
+    rkList.push(Object.assign({ id, at: rkNow(), writer: rkWriter, cat: rkForm.cat, no, note, ph }, c));
   }
   await rkSaveList();
 
@@ -4485,6 +4586,7 @@ async function rkSave() {
   rkSaveDraft();
   document.getElementById('rkNo').value = '';
   document.getElementById('rkNote').value = '';
+  rkClearPhotos();
   rkRender();
   show('ok', editing ? `<b>${esc(no)}</b> 수정했습니다.`
                      : `<b>${esc(no)}</b> 저장했습니다. 지금까지 <b>${rkList.length}건</b> 쌓였습니다.`, 3500);
@@ -4492,13 +4594,17 @@ async function rkSave() {
 
 function rkCancelEdit() {
   rkForm = { cat: rkForm.cat, no: '', s1: -1, s2: -1, s3: -1, crit: [], note: '', editId: null };
-  rkSaveDraft(); document.getElementById('rkNo').value = ''; document.getElementById('rkNote').value = ''; rkRender();
+  rkSaveDraft(); document.getElementById('rkNo').value = ''; document.getElementById('rkNote').value = '';
+  rkClearPhotos(); rkRender();
 }
 
 /** 목록에서 고쳐 쓰기 */
-function rkEdit(id) {
+async function rkEdit(id) {
   const e = rkList.find(x => x.id === id);
   if (!e) return;
+  // 새로 쓰던 것이 있으면 날아가기 전에 한 번 묻는다
+  const busy = !rkForm.editId && ((document.getElementById('rkNo').value || '').trim() || rkPhCount());
+  if (busy && !confirm('작성 중이던 내용이 있습니다.\n버리고 이 개소를 불러올까요?')) return;
   const L = RK_LOGIC[e.cat];
   const gi = L.groups.findIndex(x => e.s1 && x.t === e.s1.t);
   const g = L.groups[gi];
@@ -4513,6 +4619,13 @@ function rkEdit(id) {
   rkSaveDraft();
   document.getElementById('rkNo').value = e.no;
   document.getElementById('rkNote').value = e.note || '';
+  rkClearPhotos();
+  for (const [k] of RK_PH) {
+    if (!e.ph || !e.ph[k]) continue;
+    try { const b = await dbGet(rkPhKey(id, k)); if (b) rkPhotos[k] = { blob: b, w: e.ph[k].w, h: e.ph[k].h }; }
+    catch (err) { /* 무시 */ }
+  }
+  await rkSaveDraftPh();
   rkRender();
   window.scrollTo(0, 0);
   show('warn', `<b>${esc(e.no)}</b> 을(를) 고치는 중입니다. 다 고친 뒤 <b>수정 내용 저장</b>을 누르세요.`, 0);
@@ -4521,12 +4634,14 @@ async function rkDel(id) {
   const e = rkList.find(x => x.id === id);
   if (!e || !confirm(`${e.cat} ${e.no} 을(를) 목록에서 지울까요?`)) return;
   rkList = rkList.filter(x => x.id !== id);
+  await rkDelEntryPhotos(id);
   if (rkForm.editId === id) rkCancelEdit();
   await rkSaveList(); rkRender();
 }
 async function rkClearAll() {
   if (!rkList.length) return;
   if (!confirm(`쌓인 ${rkList.length}건을 모두 지울까요?\n엑셀을 먼저 받아 두셨는지 확인하세요.`)) return;
+  for (const e of rkList) await rkDelEntryPhotos(e.id);
   rkList = []; await rkSaveList(); rkRender();
   show('ok', '목록을 비웠습니다.', 2500);
 }
@@ -4544,7 +4659,7 @@ function rkRenderList() {
     <div class="item${rkForm.editId === e.id ? ' rk-editing' : ''}">
       ${rkGradeTag(e.final)}
       <div class="tx" onclick="rkEdit('${e.id}')"><b>${esc(e.no)}</b>
-        <span>${esc(e.cat)} · ${esc(e.s1 ? e.s1.t : '')} · ${esc(e.at.slice(5))}${e.note ? ' · 비고 있음' : ''}</span></div>
+        <span>${esc(e.cat)} · ${esc(e.s1 ? e.s1.t : '')} · ${esc(e.at.slice(5))} · 사진 ${Object.keys(e.ph || {}).length}/3${e.note ? ' · 비고 있음' : ''}</span></div>
       <button class="item-ed" onclick="rkEdit('${e.id}')">수정</button>
       <button class="rm" onclick="rkDel('${e.id}')">삭제</button>
     </div>`).join('');
@@ -4563,7 +4678,21 @@ async function rkMakeExcel() {
   const btn = document.getElementById('actBtn');
   btn.disabled = true; setStatus('엑셀 만드는 중…');
   try {
-    const out = RiskXlsx.build({ writer: rkWriter, rows: rkList, made: rkNow() });
+    const total = rkList.reduce((n, e) => n + Object.keys(e.ph || {}).length, 0);
+    let done = 0;
+    const photos = [];
+    for (const e of rkList) {
+      const o = {};
+      for (const [k] of RK_PH) {
+        if (!e.ph || !e.ph[k]) continue;
+        try { const b = await dbGet(rkPhKey(e.id, k)); if (b) o[k] = await rkPhForExcel(b); }
+        catch (err) { console.error(err); }
+        setStatus(`사진 넣는 중… ${++done}/${total}`);
+      }
+      photos.push(o);
+    }
+    setStatus('엑셀 만드는 중…');
+    const out = RiskXlsx.build({ writer: rkWriter, rows: rkList, made: rkNow(), photos });
     const d = new Date(), p = n => String(n).padStart(2, '0');
     const ymd = String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate());
     download(out, `위험개소 체크리스트_${safeName(rkWriter) || '작성자'}_${ymd}${FILE_EXT}`);
@@ -4575,12 +4704,16 @@ async function rkMakeExcel() {
 
 /* 엑셀 파일을 처음부터 만든다 (양식 없이) */
 const RiskXlsx = (function () {
-  const { zip } = XlsxLite;
+  const { zip, enc } = XlsxLite;
   const SHEET = '위험개소 체크리스트';
   const HEAD = ['순번', '점검일시', '작성자', '구분', 'SK관리번호\n(전주: 전산화번호)',
                 '설치 위치\n(1단계)', '등급', '현장환경\n(2단계)', '등급', '현장환경\n(3단계)', '등급',
-                'Critical 위험요소', '최종\n등급', '비고'];
-  const WIDTH = [6, 16.5, 10, 7, 17, 17, 6.5, 30, 6.5, 33, 6.5, 38, 8, 30];
+                'Critical 위험요소', '최종\n등급', '비고', '전경사진_1', '전경사진_2', '시설물 사진'];
+  const WIDTH = [6, 16.5, 10, 7, 17, 17, 6.5, 30, 6.5, 33, 6.5, 38, 8, 30, 25, 25, 25];
+  const PH_COL = 14;                      // O열부터 사진
+  const PH_KEYS = ['f1', 'f2', 'fac'];
+  const PH_ROW_PT = 120;                  // 사진 있는 줄 높이(pt) = 160px
+  const BOX_W = 160, BOX_H = 148, PAD_X = 6, EMU = 9525;
   const x = s => String(s == null ? '' : s)
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -4639,8 +4772,9 @@ const RiskXlsx = (function () {
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
 
-  function build({ writer, rows, made }) {
+  function build({ writer, rows, made, photos }) {
     const N = rows.length;
+    const pics = [];
     const st = (g) => GRADE_ST['C' + rkRank(g)] || 4;
     let sd = '';
     sd += `<row r="1" ht="26" customHeight="1">${cell(1, 0, SHEET, 1)}</row>`;
@@ -4657,26 +4791,42 @@ const RiskXlsx = (function () {
         [e.s3 ? e.s3.t : '-', 3], [e.s3 ? e.s3.g : '', e.s3 ? st(e.s3.g) : 4],
         [crit || '없음', 3], [e.final || '', e.final ? st(e.final) : 4],
         [e.note || '', 3],
+        ['', 4], ['', 4], ['', 4],
       ];
       const n = Math.max(1, lines(vals[5][0], WIDTH[5]), lines(vals[7][0], WIDTH[7]),
                          lines(vals[9][0], WIDTH[9]), lines(crit, WIDTH[11]), lines(e.no, WIDTH[4]),
                          lines(e.note, WIDTH[13]));
-      sd += `<row r="${r}" ht="${Math.max(22, n * 14.5 + 6)}" customHeight="1">` +
+      const ph = (photos && photos[i]) || {};
+      const hasPh = PH_KEYS.some(k => ph[k]);
+      const ht = Math.max(22, n * 14.5 + 6, hasPh ? PH_ROW_PT : 0);
+      sd += `<row r="${r}" ht="${ht}" customHeight="1">` +
             vals.map(([v, s], c) => cell(r, c, v, s)).join('') + '</row>';
+      // 사진 : 칸 안에 비율 그대로, 위아래 가운데
+      const rowPx = ht * 4 / 3;
+      PH_KEYS.forEach((k, j) => {
+        const p = ph[k];
+        if (!p) return;
+        const sc = Math.min(BOX_W / p.w, BOX_H / p.h);
+        const pw = p.w * sc, phh = p.h * sc;
+        pics.push({ bytes: p.bytes, name: `${e.no} ${HEAD[PH_COL + j]}`,
+          fit: { col: PH_COL + j, row: r - 1, colOff: PAD_X * EMU,
+                 rowOff: Math.round(Math.max(0, (rowPx - phh) / 2) * EMU),
+                 cx: Math.round(pw * EMU), cy: Math.round(phh * EMU) } });
+      });
     });
 
     const lastRow = 3 + N;
-    const ref = `A3:N${lastRow}`;
+    const ref = `A3:Q${lastRow}`;
     const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
-<dimension ref="A1:N${lastRow}"/>
+<dimension ref="A1:Q${lastRow}"/>
 <sheetViews><sheetView tabSelected="1" workbookViewId="0"><pane ySplit="3" topLeftCell="A4" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A4" sqref="A4"/></sheetView></sheetViews>
 <sheetFormatPr defaultRowHeight="16.5"/>
 <cols>${WIDTH.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>
 <sheetData>${sd}</sheetData>
 <autoFilter ref="${ref}"/>
-<mergeCells count="2"><mergeCell ref="A1:N1"/><mergeCell ref="A2:N2"/></mergeCells>
+<mergeCells count="2"><mergeCell ref="A1:Q1"/><mergeCell ref="A2:Q2"/></mergeCells>
 <pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>
 <pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>
 </worksheet>`;
@@ -4685,18 +4835,18 @@ const RiskXlsx = (function () {
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <bookViews><workbookView/></bookViews>
 <sheets><sheet name="${x(SHEET)}" sheetId="1" r:id="rId1"/></sheets>
-<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${x(SHEET)}'!$A$3:$N$${lastRow}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">'${x(SHEET)}'!$3:$3</definedName></definedNames>
+<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${x(SHEET)}'!$A$3:$Q$${lastRow}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="0">'${x(SHEET)}'!$3:$3</definedName></definedNames>
 </workbook>`;
 
     const files = new Map();
-    files.set('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    files.set('[Content_Types].xml', enc.encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
 <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
 <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
 <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-</Types>`);
+</Types>`));
     files.set('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
@@ -4708,7 +4858,8 @@ const RiskXlsx = (function () {
 <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>`);
     files.set('xl/styles.xml', STYLES);
-    files.set('xl/worksheets/sheet1.xml', sheet);
+    const finalSheet = pics.length ? XlsxUtil.writeDrawing(files, sheet, pics, null) : sheet;
+    files.set('xl/worksheets/sheet1.xml', finalSheet);
     return zip(files);
   }
   return { build };
